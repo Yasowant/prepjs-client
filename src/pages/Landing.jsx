@@ -89,32 +89,34 @@ function TypingCode() {
 const FLOATERS = ["=>", "async", "{ }", "??", "...spread", "await", "this", "===", "[ ]", "npm run dev", "useState()", "console.log"];
 
 const FEATURES = [
-  { icon: "📚", title: "81+ Concepts, Zero Gaps", desc: "Variables to V8 internals — every concept explained with runnable code and the exact interview answers." },
-  { icon: "⌨️", title: "VS Code Playground", desc: "The real Monaco editor in your browser. Predict the output, hit Run, watch the terminal." },
-  { icon: "⚙️", title: "JS Internals Explained", desc: "Call stack vs heap, execution phases, garbage collection, the runtime — with diagrams." },
-  { icon: "📝", title: "Quizzes + Tricky Traps", desc: "93 MCQs including a dedicated 'tricky' bank of the traps interviewers love to spring." },
-  { icon: "🤖", title: "AI Doubt Coach", desc: "Stuck on closures at 2 AM? Ask anything — answers like a friendly senior dev, with code." },
-  { icon: "📈", title: "Progress Tracking", desc: "Mark concepts done, bookmark tricky ones, watch your completion percentage climb to 100." },
+  { icon: "📚", title: "108+ Concepts, Zero Gaps", desc: "JavaScript from variables to V8 internals, React from JSX to concurrent rendering — with runnable code and real interview answers." },
+  { icon: "⚛️", title: "Full React Track", desc: "Hooks deep-dives, Virtual DOM, performance, Redux, React 18 — plus the most-asked React interview questions." },
+  { icon: "🎯", title: "315+ Q&A Bank", desc: "Every interview question in one place — filter by JS or React, search, and rehearse answers out loud." },
+  { icon: "⌨️", title: "VS Code Playground", desc: "The real Monaco editor in your browser. Coding problems with auto-tests, scenario projects, and a live terminal." },
+  { icon: "🤖", title: "AI Doubt Coach", desc: "Stuck on closures or useEffect at 2 AM? Ask anything — answers like a friendly senior dev, with code." },
+  { icon: "📈", title: "Progress Tracking", desc: "Quizzes with tricky traps, per-category progress bars, bookmarks — watch yourself become interview-ready." },
 ];
 
 const PREVIEWS = [
   { id: "closures", icon: "🔒", title: "Closures", level: "intermediate", teaser: "A function that remembers the scope it was born in — THE most asked JS question." },
   { id: "event-loop", icon: "⏳", title: "Event Loop", level: "advanced", teaser: "Sync → microtasks → macrotasks. Predict any console.log ordering question." },
-  { id: "how-js-executes", icon: "⚙️", title: "How JS Executes", level: "intermediate", teaser: "Parser → AST → bytecode → JIT. Why hoisting exists at all." },
-  { id: "memory-stack-heap", icon: "🧠", title: "Stack vs Heap", level: "intermediate", teaser: "Where variables actually live — frames, references, and stack overflow." },
+  { id: "jsx", icon: "⚛️", title: "JSX", level: "basic", teaser: "It compiles to React.createElement — why className, braces, and one root element." },
+  { id: "virtual-dom", icon: "🌳", title: "Virtual DOM", level: "intermediate", teaser: "How React diffs trees and patches only what changed — reconciliation explained." },
   { id: "this-keyword", icon: "🎯", title: "The 'this' Keyword", level: "intermediate", teaser: "Four binding rules + arrows. Never be surprised by this again." },
+  { id: "state-usestate", icon: "🪝", title: "State & useState", level: "basic", teaser: "Why setCount(count+1) twice adds one — batching, closures, functional updates." },
+  { id: "memory-stack-heap", icon: "🧠", title: "Stack vs Heap", level: "intermediate", teaser: "Where variables actually live — frames, references, and stack overflow." },
   { id: "debounce-throttle", icon: "🚀", title: "Debounce & Throttle", level: "advanced", teaser: "The must-write utilities of every machine coding round." },
 ];
 
 const ROADMAP = [
-  ["Fundamentals", "Variables · Types · Coercion · Operators · Loops"],
+  ["JS Fundamentals", "Variables · Types · Coercion · Operators · Loops"],
   ["Functions & Scope", "Arrows · Closures · Hoisting · Currying · IIFE"],
   ["JS Internals", "Execution Context · Stack vs Heap · Memory · GC"],
-  ["Objects & OOP", "this · Prototypes · Classes · Inheritance"],
-  ["Arrays & Methods", "map/filter/reduce · Destructuring · Spread"],
+  ["Objects, OOP & Arrays", "this · Prototypes · Classes · map/filter/reduce"],
   ["Async JavaScript", "Event Loop · Promises · async/await · fetch"],
-  ["ES6+ & Browser", "Modules · Generators · DOM · Events · Storage"],
-  ["Advanced + Coding", "Debounce · Patterns · Polyfills · Tricky Outputs"],
+  ["Advanced JS + Coding", "Debounce · Patterns · Polyfills · Tricky Outputs"],
+  ["React Basics & Hooks", "JSX · Props · State · useEffect · Custom Hooks"],
+  ["React Advanced", "Virtual DOM · Performance · Redux · React 18"],
 ];
 
 const TESTIMONIALS = [
@@ -125,10 +127,11 @@ const TESTIMONIALS = [
 
 const FAQS = [
   ["Is PrepJS really free?", "Yes — every concept, quiz, the playground and the AI coach are free. Just sign up and verify your email."],
-  ["I'm a complete beginner. Will I understand it?", "Absolutely. Concepts are organized basic → intermediate → advanced. Start with Fundamentals, and 11 concepts are open without even logging in."],
-  ["How is this different from YouTube tutorials?", "Every concept is structured for interviews: explanation + runnable code + the actual Q&A interviewers ask. Plus quizzes to prove you retained it, and progress tracking to keep you honest."],
-  ["Does it cover machine coding rounds?", "Yes — polyfills (map, bind, Promise.all), debounce/throttle, deep clone, event emitters, plus tricky output-prediction questions with a dedicated quiz."],
-  ["Can I practice code inside PrepJS?", "Yes — the Playground is a real VS Code (Monaco) editor with runnable snippets and your own files, saved in your browser."],
+  ["Does it cover React or only JavaScript?", "Both, fully. The React track has 27 concepts and 100+ interview Q&A: JSX, hooks deep-dives, Virtual DOM, performance, Redux, React 18 concurrent features, and the most-asked practical scenario questions."],
+  ["I'm a complete beginner. Will I understand it?", "Absolutely. Concepts are organized basic → intermediate → advanced. Start with JS Fundamentals, and several concepts (including JSX and useState) are open without even logging in."],
+  ["How is this different from YouTube tutorials?", "Every concept is structured for interviews: explanation + runnable code + the actual Q&A interviewers ask. Plus a 315-question Q&A bank, quizzes to prove you retained it, and progress tracking to keep you honest."],
+  ["Does it cover machine coding rounds?", "Yes — polyfills (map, bind, Promise.all), debounce/throttle, deep clone, event emitters, coding problems with auto-tests, and scenario projects like LRU cache and rate limiters."],
+  ["Can I practice code inside PrepJS?", "Yes — the Playground is a real VS Code (Monaco) editor with coding problems, projects, runnable snippets and your own files, saved in your browser."],
 ];
 
 /* ---------- page ---------- */
@@ -166,12 +169,12 @@ export default function Landing() {
           <span className="pulse-dot" /> {stats.concepts}+ concepts · quizzes · playground · AI coach
         </div>
         <h1>
-          Master <span className="gradient-text shimmer">JavaScript</span>
-          <br /> from Basics to Internals
+          Master <span className="gradient-text shimmer">JavaScript & React</span>
+          <br /> from Basics to Interview-Ready
         </h1>
         <p className="hero-sub">
-          The complete interview prep platform — every concept, the traps, the polyfills,
-          a VS Code playground and a 24/7 AI coach.
+          The complete frontend interview prep platform — every JS & React concept,
+          the traps, the polyfills, hooks deep-dives, a VS Code playground and a 24/7 AI coach.
         </p>
         <p className="hero-tagline">From <code>console.log</code> to offer letter. 🚀</p>
         <div className="hero-cta">
@@ -210,10 +213,10 @@ export default function Landing() {
       {/* STATS */}
       <section className="stats-strip">
         <div><CountUp to={stats.concepts} suffix="+" /><span>Concepts</span></div>
-        <div><CountUp to={stats.categories} /><span>Categories</span></div>
-        <div><CountUp to={190} suffix="+" /><span>Interview Q&A</span></div>
-        <div><CountUp to={93} /><span>Quiz Questions</span></div>
-        <div><CountUp to={7} /><span>Code Snippets</span></div>
+        <div><CountUp to={2} /><span>Tracks: JS + React</span></div>
+        <div><CountUp to={315} suffix="+" /><span>Interview Q&A</span></div>
+        <div><CountUp to={99} /><span>Quiz Questions</span></div>
+        <div><CountUp to={21} /><span>Coding Problems & Projects</span></div>
       </section>
 
       {/* CATEGORIES */}
@@ -417,8 +420,8 @@ TERMINAL
                 <h2>Your next interview is coming.<br /><span className="gradient-text shimmer">Be ready for it.</span></h2>
               </div>
               <p className="cta-sub">
-                Unlock all {stats.concepts}+ concepts, the coding playground, quizzes
-                and your personal AI coach — everything in one place.
+                Unlock all {stats.concepts}+ JavaScript & React concepts, the 315+ Q&A bank,
+                the coding playground, quizzes and your personal AI coach — everything in one place.
               </p>
               <div className="cta-checks">
                 <span>✓ Free forever</span>
@@ -446,15 +449,17 @@ TERMINAL
             <span className="footer-brand"><Logo size={30} /> Prep<span className="brand-accent">JS</span></span>
             <p className="footer-tagline">From <code>console.log</code> to offer letter. 🚀</p>
             <p className="footer-mini">
-              The complete JavaScript interview prep platform — every concept,
-              a VS Code playground, quizzes, and a 24/7 AI coach.
+              The complete JavaScript & React interview prep platform — every concept,
+              a 315+ Q&A bank, a VS Code playground, quizzes, and a 24/7 AI coach.
             </p>
             <span className="footer-stack">React · Node.js · Express · MongoDB</span>
           </div>
 
           <div className="footer-col">
             <h4>Learn</h4>
-            <Link to="/concepts">Concepts</Link>
+            <Link to="/concepts?track=js">JavaScript Concepts</Link>
+            <Link to="/concepts?track=react">React Concepts</Link>
+            <Link to="/questions">Q&A Bank</Link>
             <Link to="/playground">Playground</Link>
             <Link to="/quiz">Quizzes</Link>
             <Link to="/chat">AI Coach</Link>
