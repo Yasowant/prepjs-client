@@ -67,8 +67,9 @@ body {
   line-height: 1.6;
 }
 
-h1, h2 { font-weight: 900; letter-spacing: -0.3px; }
-h3, h4 { font-weight: 800; }
+h1, h2 { font-weight: 700; letter-spacing: -0.2px; }
+h3, h4 { font-weight: 600; }
+strong, b { font-weight: 700; }
 
 a { color: var(--accent); text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
@@ -83,7 +84,7 @@ button { font-family: inherit; cursor: pointer; }
   backdrop-filter: blur(12px);
 }
 .brand {
-  font-size: 1.3rem; font-weight: 800; color: var(--text);
+  font-size: 1.3rem; font-weight: 700; color: var(--text);
   display: flex; align-items: center; gap: 9px;
 }
 .brand svg { transition: transform 0.25s; }
@@ -104,7 +105,7 @@ button { font-family: inherit; cursor: pointer; }
 .nav-avatar {
   width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #111; font-weight: 800; font-size: 0.85rem;
+  color: #111; font-weight: 700; font-size: 0.85rem;
   display: flex; align-items: center; justify-content: center;
 }
 .theme-toggle {
@@ -148,7 +149,7 @@ button { font-family: inherit; cursor: pointer; }
   border: 1px solid var(--border); color: var(--text-dim);
   font-size: 0.85rem; margin-bottom: 26px; background: var(--bg-soft);
 }
-.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 800; line-height: 1.15; }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700; line-height: 1.15; }
 .gradient-text {
   background: linear-gradient(90deg, var(--primary), var(--accent));
   -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -277,7 +278,7 @@ button { font-family: inherit; cursor: pointer; }
 .roadmap-num {
   flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #111; font-weight: 800; display: flex;
+  color: #111; font-weight: 700; display: flex;
   align-items: center; justify-content: center;
 }
 .roadmap-step h4 { font-size: 1.05rem; }
@@ -312,7 +313,7 @@ button { font-family: inherit; cursor: pointer; }
 .footer-brand-col { display: flex; flex-direction: column; gap: 12px; }
 .footer-brand {
   display: flex; align-items: center; gap: 9px;
-  font-weight: 800; font-size: 1.35rem; color: var(--text);
+  font-weight: 700; font-size: 1.35rem; color: var(--text);
 }
 .footer-tagline { font-size: 1.05rem; font-weight: 700; color: var(--text); }
 .footer-tagline code {
@@ -559,7 +560,7 @@ button { font-family: inherit; cursor: pointer; }
   content: ""; position: absolute; width: 104px; height: 104px;
   border-radius: 50%; background: var(--card);
 }
-.result-pct { position: relative; font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+.result-pct { position: relative; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
 .result-hero h1 { font-size: 1.8rem; margin: 4px 0 0; }
 .result-breakdown { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin: 8px 0 4px; }
 .rb-chip {
@@ -592,7 +593,7 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: var(--radius); padding: 24px;
   display: flex; flex-direction: column; gap: 4px;
 }
-.dash-num { font-size: 2rem; font-weight: 800; color: var(--primary); }
+.dash-num { font-size: 2rem; font-weight: 700; color: var(--primary); }
 .dash-label { color: var(--text-dim); font-size: 0.88rem; }
 .progress-bar {
   height: 8px; border-radius: 100px; background: var(--bg-soft);
@@ -939,7 +940,7 @@ button { font-family: inherit; cursor: pointer; }
 .diff-chip.medium { color: var(--primary); background: rgba(250, 204, 21, 0.12); }
 .diff-chip.hard { color: var(--red); background: rgba(248, 113, 113, 0.12); }
 .pg-solved {
-  color: var(--green); font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+  color: var(--green); font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
 }
 
 .pg-new-file {
@@ -969,7 +970,7 @@ button { font-family: inherit; cursor: pointer; }
   border-color: rgba(250, 204, 21, 0.35);
 }
 .pg-file-icon {
-  font-size: 0.6rem; font-weight: 800; color: #f7df1e;
+  font-size: 0.6rem; font-weight: 700; color: #f7df1e;
   background: rgba(247, 223, 30, 0.12); border-radius: 4px; padding: 2px 4px;
 }
 .pg-sidebar-hint {
@@ -992,7 +993,7 @@ button { font-family: inherit; cursor: pointer; }
   border-top: 2px solid var(--primary);
 }
 .pg-tab-icon {
-  font-size: 0.58rem; font-weight: 800; color: #f7df1e;
+  font-size: 0.58rem; font-weight: 700; color: #f7df1e;
   background: rgba(247, 223, 30, 0.12); border-radius: 4px; padding: 2px 5px;
 }
 .pg-actions { display: flex; gap: 8px; align-items: center; }
@@ -1085,7 +1086,7 @@ button { font-family: inherit; cursor: pointer; }
 .btn-submit {
   background: linear-gradient(135deg, var(--primary), #f59e0b);
   color: #1a1a06; border: none;
-  padding: 7px 18px; border-radius: 8px; font-weight: 800; font-size: 0.88rem;
+  padding: 7px 18px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;
   box-shadow: 0 4px 18px rgba(250, 204, 21, 0.3);
 }
 .btn-submit:hover { filter: brightness(1.08); }
@@ -1113,7 +1114,7 @@ button { font-family: inherit; cursor: pointer; }
 .sub-row.accepted .sub-status { color: var(--green); }
 .sub-row.failed .sub-status { color: var(--red); }
 .sub-time { color: var(--text-dim); font-size: 0.72rem; }
-.pgb-solved { color: var(--primary); font-weight: 800; }
+.pgb-solved { color: var(--primary); font-weight: 700; }
 
 @media (max-width: 900px) {
   .pg-problem { display: none; }
@@ -1348,7 +1349,7 @@ button { font-family: inherit; cursor: pointer; }
 .profile-avatar {
   width: 84px; height: 84px; border-radius: 50%; flex-shrink: 0;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #111; font-weight: 800; font-size: 2.2rem;
+  color: #111; font-weight: 700; font-size: 2.2rem;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 12px 34px rgba(250, 204, 21, 0.25);
 }
@@ -1401,7 +1402,7 @@ button { font-family: inherit; cursor: pointer; }
 .about-photo-fallback {
   display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #111; font-size: 4rem; font-weight: 800;
+  color: #111; font-size: 4rem; font-weight: 700;
 }
 .about-photo-glow {
   position: absolute; inset: -18px; border-radius: 36px; z-index: 0;
@@ -1584,7 +1585,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ---------- LOCKED CONCEPTS ---------- */
 .lock-badge { font-size: 0.9rem; }
 .free-badge {
-  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.8px;
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px;
   color: var(--green); background: rgba(52, 211, 153, 0.14);
   border: 1px solid rgba(52, 211, 153, 0.35);
   padding: 2px 8px; border-radius: 100px;
@@ -1642,7 +1643,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 .auth-brand-inner { position: relative; z-index: 1; max-width: 400px; }
 .auth-logo {
-  font-size: 1.5rem; font-weight: 800; margin-bottom: 28px;
+  font-size: 1.5rem; font-weight: 700; margin-bottom: 28px;
   display: flex; align-items: center; gap: 11px;
 }
 .auth-brand h2 { font-size: 2.1rem; line-height: 1.2; margin-bottom: 30px; }
