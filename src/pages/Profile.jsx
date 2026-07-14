@@ -1,7 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+
+// crop-to-square + resize in the browser so uploads are tiny (~40KB)
+function resizeImage(file, size = 256) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2;
+      const sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      URL.revokeObjectURL(img.src);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => reject(new Error("Could not read that image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
@@ -15,6 +35,47 @@ export default function Profile() {
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
   const [pwMsg, setPwMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  const fileRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState(null);
+
+  async function onPickPhoto(e) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+    setAvatarMsg(null);
+    if (!file.type.startsWith("image/"))
+      return setAvatarMsg({ ok: false, text: "Please choose an image file (JPG/PNG)" });
+    if (file.size > 8 * 1024 * 1024)
+      return setAvatarMsg({ ok: false, text: "Image is too large (max 8MB)" });
+
+    setUploading(true);
+    try {
+      const dataUrl = await resizeImage(file);
+      const d = await api("/auth/avatar", { method: "POST", auth: true, body: { image: dataUrl } });
+      updateUser({ avatar: d.user.avatar });
+      setAvatarMsg({ ok: true, text: "Photo updated ✓" });
+    } catch (err) {
+      setAvatarMsg({ ok: false, text: err.message });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function removePhoto() {
+    if (!confirm("Remove your profile photo?")) return;
+    setUploading(true);
+    try {
+      await api("/auth/avatar", { method: "DELETE", auth: true });
+      updateUser({ avatar: null });
+      setAvatarMsg({ ok: true, text: "Photo removed" });
+    } catch (err) {
+      setAvatarMsg({ ok: false, text: err.message });
+    } finally {
+      setUploading(false);
+    }
+  }
 
   useEffect(() => {
     api("/auth/me", { auth: true }).then((d) => {
@@ -68,11 +129,45 @@ export default function Profile() {
 
       {/* identity card */}
       <div className="profile-card">
-        <div className="profile-avatar">{(user?.name?.[0] || "?").toUpperCase()}</div>
+        <div className="profile-avatar-wrap">
+          {user?.avatar ? (
+            <img src={user.avatar} alt={user.name} className="profile-avatar profile-avatar-img" />
+          ) : (
+            <div className="profile-avatar">{(user?.name?.[0] || "?").toUpperCase()}</div>
+          )}
+          <button
+            className="avatar-edit"
+            title="Change photo"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? "⏳" : "📷"}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={onPickPhoto}
+          />
+        </div>
         <div className="profile-id">
           <h2>{user?.name}</h2>
           <span>{user?.email}</span>
           <span className="profile-joined">🗓 Member since {joined}</span>
+          <div className="avatar-actions">
+            <button className="avatar-link" onClick={() => fileRef.current?.click()} disabled={uploading}>
+              {uploading ? "Uploading…" : user?.avatar ? "Change photo" : "Upload photo"}
+            </button>
+            {user?.avatar && (
+              <button className="avatar-link danger" onClick={removePhoto} disabled={uploading}>
+                Remove
+              </button>
+            )}
+          </div>
+          {avatarMsg && (
+            <span className={`avatar-msg ${avatarMsg.ok ? "ok" : "bad"}`}>{avatarMsg.text}</span>
+          )}
         </div>
         <div className="profile-mini-stats">
           <div><strong>{stats ? `${stats.percent}%` : "—"}</strong><span>completed</span></div>

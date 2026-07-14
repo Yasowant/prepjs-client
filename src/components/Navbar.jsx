@@ -25,7 +25,11 @@ export default function Navbar() {
         {user ? (
           <>
             <Link to="/profile" className="nav-user-link" title="Your profile">
-              <span className="nav-avatar">{user.name[0].toUpperCase()}</span>
+              {user.avatar ? (
+                <img src={user.avatar} alt="" className="nav-avatar nav-avatar-img" />
+              ) : (
+                <span className="nav-avatar">{user.name[0].toUpperCase()}</span>
+              )}
               <span className="nav-user">{user.name.split(" ")[0]}</span>
             </Link>
             <button className="btn btn-ghost" onClick={() => { logout(); navigate("/"); }}>
