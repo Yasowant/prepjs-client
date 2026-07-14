@@ -19,10 +19,33 @@ export function clearTokens() {
   localStorage.removeItem("refreshToken");
 }
 
+// Retries network-level failures (server cold start on Render, flaky mobile
+// connections). HTTP errors (4xx/5xx) are NOT retried — only unreachable server.
+async function fetchWithRetry(url, options, retries = 3) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (attempt >= retries) {
+        throw new Error(
+          "Can't reach the server — it may just be waking up. Please try again in a few seconds."
+        );
+      }
+      // backoff: 1.5s, 3s, 4.5s — enough for a cold server to boot
+      await new Promise((r) => setTimeout(r, (attempt + 1) * 1500));
+    }
+  }
+}
+
+// Fire-and-forget ping to wake a sleeping server as soon as the app opens.
+export function warmUpServer() {
+  fetch(`${BASE}/health`).catch(() => {});
+}
+
 async function refresh() {
   const { refreshToken } = getTokens();
   if (!refreshToken) throw new Error("No refresh token");
-  const res = await fetch(`${BASE}/auth/refresh`, {
+  const res = await fetchWithRetry(`${BASE}/auth/refresh`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ refreshToken }),
@@ -39,7 +62,7 @@ export async function api(path, { method = "GET", body, auth = false, _retried =
     const { accessToken } = getTokens();
     if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   }
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetchWithRetry(`${BASE}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
