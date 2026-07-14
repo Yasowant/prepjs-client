@@ -139,6 +139,7 @@ const FAQS = [
 export default function Landing() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ concepts: 81, categories: 11 });
+  const [community, setCommunity] = useState(null);
 
   useEffect(() => {
     api("/concepts/categories")
@@ -150,6 +151,7 @@ export default function Landing() {
         })
       )
       .catch(() => {});
+    api("/stats").then(setCommunity).catch(() => {});
   }, []);
 
   return (
@@ -182,6 +184,22 @@ export default function Landing() {
             {user ? "Go to Dashboard →" : "Start Learning Free →"}
           </Link>
         </div>
+        {community && community.learners > 0 && (
+          <div className="hero-proof">
+            <span className="hero-proof-avatars">
+              {["👩‍💻", "👨‍💻", "🧑‍💻"].map((a, i) => (
+                <span className="hero-proof-avatar" key={i}>{a}</span>
+              ))}
+            </span>
+            {community.accepted > 0 ? (
+              <>🏆 <strong>{community.accepted}</strong> solution{community.accepted !== 1 && "s"} accepted
+              · <strong>{community.learners}</strong> learner{community.learners !== 1 && "s"} prepping — join them</>
+            ) : (
+              <><strong>{community.learners}</strong> learner{community.learners !== 1 && "s"} already prepping — join them 🚀</>
+            )}
+          </div>
+        )}
+
         <div className="hero-tracks">
           <Link to="/concepts?track=js" className="track-card">
             <span className="track-card-icon">⚡</span>
