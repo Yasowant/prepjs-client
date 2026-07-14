@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.js";
+import Confetti from "../components/Confetti.jsx";
 
 export default function Quiz() {
   const [categories, setCategories] = useState([]);
@@ -57,16 +58,47 @@ export default function Quiz() {
 
   if (result) {
     const pct = Math.round((result.score / result.total) * 100);
+    const wrong = result.review.filter((r) => r.given != null && !r.correct).length;
+    const skipped = result.review.filter((r) => r.given == null).length;
+    const celebration =
+      pct === 100 ? { emoji: "🏆", title: "PERFECT SCORE!", msg: "Flawless. You'd ace this round in a real interview." }
+      : pct >= 80 ? { emoji: "🎉", title: "Excellent!", msg: "Interview ready — just skim the explanations below." }
+      : pct >= 50 ? { emoji: "💪", title: "Good effort!", msg: "Solid base. Review the misses and retry to lock it in." }
+      : { emoji: "📖", title: "Keep going!", msg: "Every expert failed this once. Read the explanations and retry." };
+
     return (
       <div className="page">
-        <h1>Result: {result.score}/{result.total} ({pct}%)</h1>
-        <p className="page-sub">{pct >= 80 ? "🔥 Interview ready!" : pct >= 50 ? "👍 Good — review the misses." : "📖 Revisit this topic and retry."}</p>
-        {result.review.map((r) => (
+        {pct >= 50 && <Confetti />}
+
+        {/* score hero */}
+        <div className="result-hero">
+          <div className="result-emoji">{celebration.emoji}</div>
+          <div className="result-ring" style={{ "--pct": pct }}>
+            <span className="result-pct">{pct}%</span>
+          </div>
+          <h1>{celebration.title}</h1>
+          <p className="page-sub">{celebration.msg}</p>
+
+          <div className="result-breakdown">
+            <span className="rb-chip ok">✅ {result.score} correct</span>
+            <span className="rb-chip bad">❌ {wrong} wrong</span>
+            {skipped > 0 && <span className="rb-chip skip">⏭ {skipped} skipped</span>}
+            <span className="rb-chip">📊 {result.score}/{result.total}</span>
+          </div>
+
+          <div className="quiz-nav">
+            <button className="btn btn-primary" onClick={() => start(active)}>🔄 Retry Quiz</button>
+            <button className="btn btn-outline" onClick={() => setActive(null)}>All quizzes</button>
+          </div>
+        </div>
+
+        <h2 className="result-review-title">📋 Full review — every question explained</h2>
+        {result.review.map((r, i) => (
           <div key={r.id} className={`review-card ${r.correct ? "ok" : "bad"}`}>
-            <p className="review-q">{r.correct ? "✅" : "❌"} {r.question}</p>
-            <p>Your answer: <strong>{r.given != null ? r.options[r.given] : "—"}</strong></p>
-            {!r.correct && <p>Correct: <strong>{r.options[r.answer]}</strong></p>}
-            <p className="review-exp">{r.explanation}</p>
+            <p className="review-q">{r.correct ? "✅" : r.given == null ? "⏭" : "❌"} {i + 1}. {r.question}</p>
+            <p>Your answer: <strong>{r.given != null ? r.options[r.given] : "— skipped"}</strong></p>
+            <p>Correct answer: <strong className="review-correct">{r.options[r.answer]}</strong></p>
+            <p className="review-exp">💡 {r.explanation}</p>
           </div>
         ))}
         <div className="quiz-nav">
