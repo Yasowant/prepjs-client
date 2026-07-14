@@ -1,4 +1,6 @@
-const BASE = "/api";
+// In dev, Vite proxies /api → localhost:4000.
+// In production (Vercel), set VITE_API_URL to your backend URL, e.g. https://prepjs-api.onrender.com
+const BASE = `${import.meta.env.VITE_API_URL || ""}/api`;
 
 function getTokens() {
   return {
