@@ -156,6 +156,51 @@ button { font-family: inherit; cursor: pointer; }
 }
 .hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
+/* hero track cards */
+.hero-tracks {
+  display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+  margin-top: 18px;
+}
+.track-card {
+  display: flex; align-items: center; gap: 12px;
+  min-width: 280px; padding: 14px 20px; text-align: left;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; color: var(--text); transition: all 0.15s;
+}
+.track-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 14px 40px rgba(250, 204, 21, 0.12);
+}
+.track-card.react:hover {
+  border-color: var(--accent);
+  box-shadow: 0 14px 40px rgba(56, 189, 248, 0.14);
+}
+.track-card-icon { font-size: 1.6rem; }
+.track-card-body { display: flex; flex-direction: column; flex: 1; }
+.track-card-body strong { font-size: 1rem; }
+.track-card-body small { color: var(--text-dim); font-size: 0.78rem; }
+.track-card-arrow { color: var(--text-dim); font-weight: 700; }
+.track-card:hover .track-card-arrow { color: var(--primary); }
+.track-card.react:hover .track-card-arrow { color: var(--accent); }
+
+/* concepts page track switch */
+.track-switch {
+  display: inline-flex; gap: 5px; padding: 5px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 20px;
+}
+.track-btn {
+  padding: 9px 22px; border: none; border-radius: 9px;
+  background: transparent; color: var(--text-dim);
+  font-weight: 700; font-size: 0.95rem; transition: all 0.15s;
+}
+.track-btn:hover:not(.active) { color: var(--text); }
+.track-btn.active {
+  background: var(--primary); color: #1a1a06;
+  box-shadow: 0 4px 16px rgba(250, 204, 21, 0.3);
+}
+
 .code-window {
   max-width: 620px; margin: 60px auto 0;
   background: #0d1322; border: 1px solid var(--border);

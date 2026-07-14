@@ -17,6 +17,15 @@ export default function Concepts() {
 
   const category = params.get("category") || "";
   const level = params.get("level") || "";
+  const track = params.get("track") || "js";
+
+  const trackCategories = categories.filter((c) => (c.track || "js") === track);
+
+  function switchTrack(t) {
+    const next = new URLSearchParams();
+    next.set("track", t);
+    setParams(next); // reset category/level when switching tracks
+  }
 
   useEffect(() => {
     api("/concepts/categories").then(setCategories).catch(() => {});
@@ -24,11 +33,12 @@ export default function Concepts() {
 
   useEffect(() => {
     const q = new URLSearchParams();
+    q.set("track", track);
     if (category) q.set("category", category);
     if (level) q.set("level", level);
     if (search) q.set("search", search);
     api(`/concepts?${q}`, { auth: Boolean(user) }).then(setConcepts).catch(() => {});
-  }, [category, level, search, user]);
+  }, [track, category, level, search, user]);
 
   useEffect(() => {
     if (!user) return;
@@ -55,7 +65,22 @@ export default function Concepts() {
   return (
     <div className="page">
       <h1>Concept Library</h1>
-      <p className="page-sub">All JavaScript concepts — basic to advanced, with interview Q&A.</p>
+      <p className="page-sub">All the concepts — basic to advanced, with interview Q&A.</p>
+
+      <div className="track-switch">
+        <button
+          className={`track-btn ${track === "js" ? "active" : ""}`}
+          onClick={() => switchTrack("js")}
+        >
+          ⚡ JavaScript
+        </button>
+        <button
+          className={`track-btn ${track === "react" ? "active" : ""}`}
+          onClick={() => switchTrack("react")}
+        >
+          ⚛️ React.js
+        </button>
+      </div>
 
       {user && stats && (
         <div className="concepts-progress">
@@ -89,7 +114,7 @@ export default function Concepts() {
         <button className={`chip ${!category ? "active" : ""}`} onClick={() => setFilter("category", "")}>
           All
         </button>
-        {categories.map((c) => (
+        {trackCategories.map((c) => (
           <button
             key={c.id}
             className={`chip ${category === c.id ? "active" : ""}`}

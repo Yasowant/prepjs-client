@@ -178,7 +178,24 @@ export default function Landing() {
           <Link to={user ? "/dashboard" : "/register"} className="btn btn-primary btn-lg btn-glow">
             {user ? "Go to Dashboard →" : "Start Learning Free →"}
           </Link>
-          <Link to="/playground" className="btn btn-outline btn-lg">⌨️ Try the Playground</Link>
+        </div>
+        <div className="hero-tracks">
+          <Link to="/concepts?track=js" className="track-card">
+            <span className="track-card-icon">⚡</span>
+            <span className="track-card-body">
+              <strong>JavaScript</strong>
+              <small>Concepts + interview Q&A · basics → internals</small>
+            </span>
+            <span className="track-card-arrow">→</span>
+          </Link>
+          <Link to="/concepts?track=react" className="track-card react">
+            <span className="track-card-icon">⚛️</span>
+            <span className="track-card-body">
+              <strong>React.js</strong>
+              <small>Concepts + interview Q&A · JSX → React 18</small>
+            </span>
+            <span className="track-card-arrow">→</span>
+          </Link>
         </div>
 
         <div className="code-window hero-window">
