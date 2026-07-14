@@ -10,7 +10,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <Link to="/" className="brand">
-        <Logo size={30} /> Prep<span className="brand-accent">JS</span>
+        <Logo size={30} /> Dev<span className="brand-accent">Prep</span>
       </Link>
       <div className="nav-links">
         <NavLink to="/concepts">Concepts</NavLink>

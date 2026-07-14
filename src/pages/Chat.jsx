@@ -4,7 +4,7 @@ import Markdown from "../components/Markdown.jsx";
 
 const GREETING = {
   role: "assistant",
-  content: "Hi! I'm your PrepJS AI coach 🤖 Ask me anything about JavaScript, React, Node.js or interview prep. Try: \"Explain closures with an example\"",
+  content: "Hi! I'm your DevPrep AI coach 🤖 Ask me anything about JavaScript, React, Node.js or interview prep. Try: \"Explain closures with an example\"",
 };
 
 function timeAgo(date) {
@@ -136,7 +136,7 @@ export default function Chat() {
             </button>
           ))}
         </div>
-        <div className="chat-sidebar-foot">🤖 PrepJS AI Coach</div>
+        <div className="chat-sidebar-foot">🤖 DevPrep AI Coach</div>
       </aside>
 
       {/* ===== chat area ===== */}

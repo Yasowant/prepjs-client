@@ -148,7 +148,7 @@ function getStats() {
 // --- try it ---
 addTodo("Learn closures");
 addTodo("Master event loop");
-addTodo("Build PrepJS project");
+addTodo("Build DevPrep project");
 toggleTodo(1);
 console.log("Active:", filterTodos("active"));
 console.log("Done:", filterTodos("done"));
@@ -160,7 +160,7 @@ console.log("Stats:", getStats());
     title: "Quiz Game Engine",
     difficulty: "medium",
     scenario:
-      "PrepJS itself needs a quiz engine (very meta 😄). Build the logic that serves questions one by one, checks answers, tracks score, and produces a final report.",
+      "DevPrep itself needs a quiz engine (very meta 😄). Build the logic that serves questions one by one, checks answers, tracks score, and produces a final report.",
     requirements: [
       "createQuiz(questions) — takes [{ q, options, answer }]",
       "getCurrentQuestion() — question WITHOUT revealing the answer",

@@ -42,7 +42,7 @@ const PROJECTS = [
     link: "https://prep.esscentra.in",
   },
   {
-    name: "PrepJS — this app! ⚡",
+    name: "DevPrep — this app! ⚡",
     tech: "React · Node.js · Express · MongoDB · OpenAI · Monaco",
     desc: "Complete JavaScript interview prep platform: 81+ concepts, quizzes, a VS Code playground with coding problems, and an AI coach.",
     link: null,
@@ -89,14 +89,14 @@ export default function About() {
           <div className="about-photo-glow" />
         </div>
         <div className="about-intro">
-          <span className="hero-badge">👋 The developer behind PrepJS</span>
+          <span className="hero-badge">👋 The developer behind DevPrep</span>
           <h1>Yasowant <span className="gradient-text">Nayak</span></h1>
           <p className="about-role">Full Stack Software Engineer · Bangalore, India</p>
           <p className="about-summary">
             Full Stack Engineer with 3+ years building production SaaS on React.js and Node.js —
             cutting feature development time 35%, release time 50%, and page loads 40% on a
             multi-tenant platform serving 8+ enterprise organizations. Strong in system design,
-            REST/GraphQL APIs, CI/CD, and mentoring developers. PrepJS is built from the exact
+            REST/GraphQL APIs, CI/CD, and mentoring developers. DevPrep is built from the exact
             concepts and questions faced in real interviews.
           </p>
           <div className="about-links">
@@ -192,7 +192,7 @@ export default function About() {
 
       {/* CTA */}
       <section className="about-cta">
-        <p>Built PrepJS to help you crack what I've been asked in real interviews. 🤝</p>
+        <p>Built DevPrep to help you crack what I've been asked in real interviews. 🤝</p>
         <Link to="/concepts" className="btn btn-primary btn-lg">Start Learning →</Link>
       </section>
     </div>

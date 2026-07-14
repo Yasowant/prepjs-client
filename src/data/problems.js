@@ -22,7 +22,7 @@ Do NOT use a loop index if you can — try the split/reverse/join or spread appr
       { expr: `reverseString("hello")`, expected: "olleh" },
       { expr: `reverseString("a")`, expected: "a" },
       { expr: `reverseString("")`, expected: "" },
-      { expr: `reverseString("PrepJS")`, expected: "SJperP" },
+      { expr: `reverseString("DevPrep")`, expected: "SJperP" },
     ],
   },
   {

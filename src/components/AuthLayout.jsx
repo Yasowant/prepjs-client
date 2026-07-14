@@ -12,10 +12,10 @@ export default function AuthLayout({ children }) {
     <div className="auth-split">
       <aside className="auth-brand">
         <div className="auth-brand-inner">
-          <div className="auth-logo"><Logo size={42} /> Prep<span className="brand-accent">JS</span></div>
+          <div className="auth-logo"><Logo size={42} /> Dev<span className="brand-accent">Prep</span></div>
           <h2>
             Crack your next<br />
-            <span className="gradient-text">JavaScript interview</span>
+            <span className="gradient-text">frontend interview</span>
           </h2>
           <ul className="auth-perks">
             {PERKS.map(([icon, text]) => (

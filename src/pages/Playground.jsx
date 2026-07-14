@@ -26,7 +26,7 @@ function loadStored(key) {
 function buildTestHarness(problem) {
   return `
 
-/* ---------- PrepJS test runner ---------- */
+/* ---------- DevPrep test runner ---------- */
 const __tests = ${JSON.stringify(problem.tests)};
 let __pass = 0;
 for (let __i = 0; __i < __tests.length; __i++) {
@@ -50,7 +50,7 @@ postMessage({ type: "tests", pass: __pass, total: __tests.length });
 }
 
 const SNIPPETS = {
-  "welcome.js": `// ⚡ PrepJS Playground — write JS, hit ▶ Run
+  "welcome.js": `// ⚡ DevPrep Playground — write JS, hit ▶ Run
 // console.log output appears in the terminal below.
 
 const greet = (name) => \`Hello, \${name}! 👋\`;
@@ -92,7 +92,7 @@ console.log("end");
 // Predict the exact order, then run!`,
   "this.js": `// 🎯 'this' — depends on HOW you call
 const user = {
-  name: "PrepJS",
+  name: "DevPrep",
   regular() { console.log("regular:", this.name); },
   arrow: () => console.log("arrow:", this?.name),
 };

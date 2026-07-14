@@ -61,7 +61,7 @@ const TYPED_LINES = [
   'console.log("end");',
   "",
   "// → start, end, promise, timer  🤯",
-  "// Can you explain WHY? PrepJS can.",
+  "// Can you explain WHY? DevPrep can.",
 ];
 
 function TypingCode() {
@@ -126,12 +126,12 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-  ["Is PrepJS really free?", "Yes — every concept, quiz, the playground and the AI coach are free. Just sign up and verify your email."],
+  ["Is DevPrep really free?", "Yes — every concept, quiz, the playground and the AI coach are free. Just sign up and verify your email."],
   ["Does it cover React or only JavaScript?", "Both, fully. The React track has 27 concepts and 100+ interview Q&A: JSX, hooks deep-dives, Virtual DOM, performance, Redux, React 18 concurrent features, and the most-asked practical scenario questions."],
   ["I'm a complete beginner. Will I understand it?", "Absolutely. Concepts are organized basic → intermediate → advanced. Start with JS Fundamentals, and several concepts (including JSX and useState) are open without even logging in."],
   ["How is this different from YouTube tutorials?", "Every concept is structured for interviews: explanation + runnable code + the actual Q&A interviewers ask. Plus a 315-question Q&A bank, quizzes to prove you retained it, and progress tracking to keep you honest."],
   ["Does it cover machine coding rounds?", "Yes — polyfills (map, bind, Promise.all), debounce/throttle, deep clone, event emitters, coding problems with auto-tests, and scenario projects like LRU cache and rate limiters."],
-  ["Can I practice code inside PrepJS?", "Yes — the Playground is a real VS Code (Monaco) editor with coding problems, projects, runnable snippets and your own files, saved in your browser."],
+  ["Can I practice code inside DevPrep?", "Yes — the Playground is a real VS Code (Monaco) editor with coding problems, projects, runnable snippets and your own files, saved in your browser."],
 ];
 
 /* ---------- page ---------- */
@@ -302,7 +302,7 @@ export default function Landing() {
           <div className="code-window pg-promo-window">
             <div className="code-titlebar">
               <span className="dot red" /><span className="dot yellow" /><span className="dot green" />
-              <span className="code-filename">closures.js — PrepJS Playground</span>
+              <span className="code-filename">closures.js — DevPrep Playground</span>
             </div>
             <pre>{`function makeCounter() {
   let count = 0;        // private via closure
@@ -393,7 +393,7 @@ TERMINAL
       <section className="section" id="developer">
         <Reveal>
           <h2>Building <span className="gradient-text shimmer">Engineers</span>, Not Just Coders</h2>
-          <p className="dev-section-sub">— from the developer behind PrepJS</p>
+          <p className="dev-section-sub">— from the developer behind DevPrep</p>
         </Reveal>
         <Reveal delay={80}>
           <div className="dev-card">
@@ -408,7 +408,7 @@ TERMINAL
                 Full Stack Engineer with <strong>3+ years</strong> building production SaaS on
                 React.js and Node.js — scaling a multi-tenant platform to <strong>8+ enterprise
                 organizations</strong>, cutting release time 50% with CI/CD, and mentoring
-                developers along the way. I built PrepJS from the exact concepts and questions
+                developers along the way. I built DevPrep from the exact concepts and questions
                 asked in real interviews, so you can walk in prepared for what actually comes up.
               </p>
               <div className="dev-tech">
@@ -464,7 +464,7 @@ TERMINAL
       <footer className="footer-big">
         <div className="footer-grid">
           <div className="footer-col footer-brand-col">
-            <span className="footer-brand"><Logo size={30} /> Prep<span className="brand-accent">JS</span></span>
+            <span className="footer-brand"><Logo size={30} /> Dev<span className="brand-accent">Prep</span></span>
             <p className="footer-tagline">From <code>console.log</code> to offer letter. 🚀</p>
             <p className="footer-mini">
               The complete JavaScript & React interview prep platform — every concept,
@@ -501,7 +501,7 @@ TERMINAL
         </div>
 
         <div className="footer-bottom">
-          <span>© {new Date().getFullYear()} PrepJS · Developed with ❤️ by <a href="#developer">Yasowant Nayak</a></span>
+          <span>© {new Date().getFullYear()} DevPrep · Developed with ❤️ by <a href="#developer">Yasowant Nayak</a></span>
           <span className="footer-code">while (!offer) &#123; prep(); &#125;</span>
         </div>
       </footer>
