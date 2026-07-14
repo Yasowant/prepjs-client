@@ -14,6 +14,7 @@ export default function Navbar() {
       </Link>
       <div className="nav-links">
         <NavLink to="/concepts">Concepts</NavLink>
+        <NavLink to="/questions">Q&A</NavLink>
         <NavLink to="/playground">Playground</NavLink>
         {user && <NavLink to="/quiz">Quiz</NavLink>}
         {user && <NavLink to="/chat">AI Coach</NavLink>}

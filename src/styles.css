@@ -416,6 +416,35 @@ button { font-family: inherit; cursor: pointer; }
 .qa[open] summary::after { content: "−"; }
 .qa p { padding: 0 18px 16px; color: var(--text-dim); }
 
+/* ---------- Q&A BANK ---------- */
+.questions-page { max-width: 880px; }
+.qbank-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap; margin: 18px 0 16px;
+}
+.qbank-count { color: var(--text-dim); font-size: 0.9rem; }
+.qbank-count strong { color: var(--primary); }
+.qbank-list { display: flex; flex-direction: column; gap: 10px; }
+.qbank-item summary {
+  display: flex; align-items: center; gap: 10px;
+  padding-right: 44px; line-height: 1.5;
+}
+.qbank-item summary .level-badge { margin-left: auto; flex-shrink: 0; }
+.qbank-num {
+  font-family: var(--mono); color: var(--primary);
+  font-size: 0.8rem; flex-shrink: 0;
+}
+.qbank-answer {
+  color: var(--text) !important; line-height: 1.7;
+}
+.qbank-source {
+  font-size: 0.8rem !important; padding-top: 0 !important;
+  border-top: 1px dashed var(--border); margin: 0 18px;
+  padding: 10px 0 14px !important;
+}
+.qbank-source a { color: var(--accent); }
+.qbank-source a:hover { text-decoration: underline; }
+
 /* ---------- AUTH ---------- */
 .auth-page { display: flex; justify-content: center; padding: 70px 20px; }
 .auth-card {

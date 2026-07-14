@@ -17,6 +17,7 @@ import ForgotPassword from "./pages/ForgotPassword.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import About from "./pages/About.jsx";
 import Profile from "./pages/Profile.jsx";
+import Questions from "./pages/Questions.jsx";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/playground" element={<Playground />} />
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Protected><Profile /></Protected>} />
+        <Route path="/questions" element={<Protected><Questions /></Protected>} />
         <Route path="/quiz" element={<Protected><Quiz /></Protected>} />
         <Route path="/quiz/review/:id" element={<Protected><QuizReview /></Protected>} />
         <Route path="/chat" element={<Protected><Chat /></Protected>} />
