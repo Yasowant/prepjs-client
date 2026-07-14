@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PrepJS — Master JavaScript Interviews</title>
+    <meta name="description" content="Every JavaScript concept from basics to advanced. Concepts, quizzes, coding questions and an AI coach — everything you need to crack your interview." />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="theme-color" content="#0b0f1a" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+    <!-- Splash screen styles (inline so it renders before the JS bundle) -->
+    <style>
+      #splash {
+        position: fixed; inset: 0; z-index: 9999;
+        background: #0b0f1a;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 22px;
+        transition: opacity 0.55s ease, visibility 0.55s;
+      }
+      #splash.splash-hide { opacity: 0; visibility: hidden; pointer-events: none; }
+      #splash::before {
+        content: ""; position: absolute; width: 420px; height: 420px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(250, 204, 21, 0.14), transparent 65%);
+        animation: splashPulse 2.2s ease-in-out infinite;
+      }
+      .splash-logo {
+        width: 92px; height: 92px; position: relative;
+        animation: splashPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+                   splashFloat 2.6s ease-in-out 0.7s infinite;
+        filter: drop-shadow(0 0 26px rgba(250, 204, 21, 0.45));
+      }
+      .splash-name {
+        font-family: "Inter", system-ui, sans-serif;
+        font-size: 2.1rem; font-weight: 800; color: #e6ebf5;
+        letter-spacing: -0.5px; position: relative;
+        animation: splashFade 0.6s ease 0.25s both;
+      }
+      .splash-name b {
+        background: linear-gradient(90deg, #facc15, #38bdf8);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .splash-tag {
+        font-family: "JetBrains Mono", monospace; font-size: 0.85rem;
+        color: #94a3b8; position: relative;
+        animation: splashFade 0.6s ease 0.45s both;
+      }
+      .splash-bar {
+        width: 190px; height: 4px; border-radius: 100px;
+        background: #1a2438; overflow: hidden; position: relative;
+        animation: splashFade 0.6s ease 0.6s both;
+      }
+      .splash-bar::after {
+        content: ""; position: absolute; top: 0; left: -40%;
+        width: 40%; height: 100%; border-radius: 100px;
+        background: linear-gradient(90deg, #facc15, #38bdf8);
+        animation: splashLoad 1.1s ease-in-out infinite;
+      }
+      @keyframes splashPop {
+        from { transform: scale(0.3) rotate(-14deg); opacity: 0; }
+        to { transform: scale(1) rotate(0); opacity: 1; }
+      }
+      @keyframes splashFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-9px); }
+      }
+      @keyframes splashFade {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes splashPulse {
+        0%, 100% { transform: scale(1); opacity: 0.8; }
+        50% { transform: scale(1.15); opacity: 1; }
+      }
+      @keyframes splashLoad {
+        0% { left: -40%; }
+        50% { left: 50%; width: 55%; }
+        100% { left: 105%; width: 40%; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Splash screen — hidden by App.jsx after load -->
+    <div id="splash">
+      <svg class="splash-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="spGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#facc15"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="60" height="60" rx="15" fill="url(#spGrad)"/>
+        <rect x="5" y="5" width="54" height="54" rx="12" fill="#0b0f1a"/>
+        <text x="11" y="43" font-family="monospace" font-size="26" font-weight="bold" fill="#38bdf8">{</text>
+        <path d="M37 9 L20 36 h9 L26 55 L45 27 h-10 L40 9 Z" fill="#facc15"/>
+        <text x="44" y="43" font-family="monospace" font-size="26" font-weight="bold" fill="#38bdf8">}</text>
+      </svg>
+      <div class="splash-name">Prep<b>JS</b></div>
+      <div class="splash-tag">while (!offer) { prep(); }</div>
+      <div class="splash-bar"></div>
+    </div>
+
+    <div id="root"></div>
+    <script>
+      window.__splashStart = Date.now();
+      // apply saved theme before first paint (no flash)
+      document.documentElement.dataset.theme = localStorage.getItem("prepjs-theme") || "dark";
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
