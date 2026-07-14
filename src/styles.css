@@ -1062,6 +1062,39 @@ button { font-family: inherit; cursor: pointer; }
 .btn-test:hover { background: rgba(52, 211, 153, 0.12); }
 .btn-test:disabled { opacity: 0.55; }
 
+.btn-submit {
+  background: linear-gradient(135deg, var(--primary), #f59e0b);
+  color: #1a1a06; border: none;
+  padding: 7px 18px; border-radius: 8px; font-weight: 800; font-size: 0.88rem;
+  box-shadow: 0 4px 18px rgba(250, 204, 21, 0.3);
+}
+.btn-submit:hover { filter: brightness(1.08); }
+.btn-submit:disabled { opacity: 0.55; }
+
+/* submissions history */
+.sub-solved-flag {
+  color: var(--green); font-size: 0.65rem; letter-spacing: 1px;
+  background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 2px 8px; border-radius: 100px; margin-left: 8px;
+}
+.sub-empty { font-size: 0.8rem !important; }
+.sub-list { display: flex; flex-direction: column; gap: 6px; }
+.sub-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #0d1322; border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  border-radius: 8px; padding: 9px 12px;
+  font-size: 0.8rem; color: var(--text); text-align: left;
+  transition: all 0.12s;
+}
+.sub-row.accepted { border-left-color: var(--green); }
+.sub-row:hover { border-color: var(--primary); transform: translateX(3px); }
+.sub-status { font-weight: 700; font-family: var(--mono); }
+.sub-row.accepted .sub-status { color: var(--green); }
+.sub-row.failed .sub-status { color: var(--red); }
+.sub-time { color: var(--text-dim); font-size: 0.72rem; }
+.pgb-solved { color: var(--primary); font-weight: 800; }
+
 @media (max-width: 900px) {
   .pg-problem { display: none; }
 }

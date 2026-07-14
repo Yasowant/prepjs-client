@@ -2,6 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { PROBLEMS } from "../data/problems.js";
 import { PROJECTS_DATA } from "../data/projects.js";
+import { api } from "../api.js";
+
+function timeAgo(date) {
+  const s = Math.floor((Date.now() - new Date(date)) / 1000);
+  if (s < 60) return "just now";
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+  return `${Math.floor(s / 86400)}d ago`;
+}
 
 const STORAGE_KEY = "prepjs-playground-files";
 const SOLUTIONS_KEY = "prepjs-playground-solutions";
@@ -36,6 +45,7 @@ for (let __i = 0; __i < __tests.length; __i++) {
 }
 if (__pass === __tests.length) console.log("🎉 All " + __tests.length + " tests passed! Interview ready.");
 else console.warn("📊 " + __pass + "/" + __tests.length + " tests passed — keep going!");
+postMessage({ type: "tests", pass: __pass, total: __tests.length });
 `;
 }
 
@@ -191,9 +201,26 @@ export default function Playground() {
   const [briefOpen, setBriefOpen] = useState(true);
   const [output, setOutput] = useState([]);
   const [running, setRunning] = useState(false);
+  const [submissions, setSubmissions] = useState([]);
+  const [solvedSet, setSolvedSet] = useState(new Set());
+  const [submitting, setSubmitting] = useState(false);
   const workerRef = useRef(null);
+  const submitModeRef = useRef(false);
 
   const allFiles = { ...SNIPPETS, ...customFiles };
+
+  // solved badges (silently skipped for guests)
+  useEffect(() => {
+    api("/submissions/summary", { auth: true })
+      .then((d) => setSolvedSet(new Set(d.solved)))
+      .catch(() => {});
+  }, []);
+
+  function loadSubmissions(problemId) {
+    api(`/submissions/${problemId}`, { auth: true })
+      .then(setSubmissions)
+      .catch(() => setSubmissions([]));
+  }
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(customFiles));
@@ -209,6 +236,8 @@ export default function Playground() {
     setBriefOpen(type !== "file");
     setCode(type === "file" ? allFiles[data] : solutions[data.id] ?? data.starter);
     setOutput([]);
+    setSubmissions([]);
+    if (type === "problem") loadSubmissions(data.id);
   }
 
   function goBack() {
@@ -279,6 +308,8 @@ export default function Playground() {
     worker.onmessage = (e) => {
       if (e.data.type === "log") {
         setOutput((o) => [...o, { level: e.data.level, text: e.data.text }]);
+      } else if (e.data.type === "tests") {
+        handleTestResults(e.data.pass, e.data.total);
       } else if (e.data.type === "done") {
         setOutput((o) => [...o, { level: "sys", text: "✓ finished" }]);
         stop();
@@ -298,7 +329,56 @@ export default function Playground() {
 
   function runTests() {
     if (active?.type !== "problem") return;
+    submitModeRef.current = false;
     run(code + buildTestHarness(active.data), `Testing ${active.data.title}…`);
+  }
+
+  // LeetCode-style submit: run tests + store the attempt
+  function submit() {
+    if (active?.type !== "problem") return;
+    submitModeRef.current = true;
+    setSubmitting(true);
+    run(code + buildTestHarness(active.data), `Submitting ${active.data.title}…`);
+  }
+
+  async function handleTestResults(pass, total) {
+    if (!submitModeRef.current) return;
+    submitModeRef.current = false;
+    const problem = active?.data;
+    if (!problem) return setSubmitting(false);
+
+    const accepted = pass === total && total > 0;
+    try {
+      await api("/submissions", {
+        method: "POST",
+        auth: true,
+        body: { problemId: problem.id, passed: pass, total, code },
+      });
+      setOutput((o) => [
+        ...o,
+        {
+          level: accepted ? "log" : "error",
+          text: accepted
+            ? `🏆 ACCEPTED — submission saved (${pass}/${total})`
+            : `❌ WRONG ANSWER — submission saved (${pass}/${total}). Fix and submit again!`,
+        },
+      ]);
+      if (accepted) setSolvedSet((s) => new Set(s).add(problem.id));
+      loadSubmissions(problem.id);
+    } catch (err) {
+      setOutput((o) => [
+        ...o,
+        { level: "warn", text: `⚠️ Could not save submission: ${err.message} (login required to submit)` },
+      ]);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function restoreSubmission(s) {
+    if (!confirm(`Load the code from this ${s.status} submission? Your current editor code will be replaced.`)) return;
+    setCode(s.code);
+    if (active?.type === "problem") setSolutions((sol) => ({ ...sol, [active.data.id]: s.code }));
   }
 
   /* ================= BROWSE MODE ================= */
@@ -336,7 +416,9 @@ export default function Playground() {
                 <p>{p.statement.split("\n")[0]}</p>
                 <div className="pgb-card-foot">
                   <span>🧪 {p.tests.length} auto-tests</span>
-                  {solutions[p.id] && <span className="pgb-started">✓ started</span>}
+                  {solvedSet.has(p.id)
+                    ? <span className="pgb-solved">🏆 solved</span>
+                    : solutions[p.id] && <span className="pgb-started">✓ started</span>}
                 </div>
               </button>
             ))}
@@ -439,6 +521,11 @@ export default function Playground() {
           <button className="btn btn-run" onClick={() => run()} disabled={running}>
             {running ? "Running…" : "▶ Run"}
           </button>
+          {isProblem && (
+            <button className="btn btn-submit" onClick={submit} disabled={running || submitting}>
+              {submitting ? "Judging…" : "🚀 Submit"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -459,8 +546,33 @@ export default function Playground() {
                 <div className="pg-problem-section">
                   <h5>✅ Tests</h5>
                   <p className="pg-problem-statement">
-                    {item.tests.length} hidden test cases. Hit <strong>✓ Run Tests</strong> when ready.
+                    {item.tests.length} hidden test cases. <strong>✓ Run Tests</strong> to check,{" "}
+                    <strong>🚀 Submit</strong> to record your attempt.
                   </p>
+                </div>
+
+                <div className="pg-problem-section">
+                  <h5>📜 Submissions {solvedSet.has(item.id) && <span className="sub-solved-flag">✓ SOLVED</span>}</h5>
+                  {submissions.length === 0 && (
+                    <p className="pg-problem-statement sub-empty">
+                      No submissions yet — hit 🚀 Submit when your tests pass. Every attempt is saved here, like LeetCode.
+                    </p>
+                  )}
+                  <div className="sub-list">
+                    {submissions.map((s) => (
+                      <button
+                        className={`sub-row ${s.status}`}
+                        key={s._id}
+                        onClick={() => restoreSubmission(s)}
+                        title="Click to load this code into the editor"
+                      >
+                        <span className="sub-status">
+                          {s.status === "accepted" ? "✅ Accepted" : `❌ ${s.passed}/${s.total}`}
+                        </span>
+                        <span className="sub-time">{timeAgo(s.createdAt)}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </>
             )}
