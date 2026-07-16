@@ -212,9 +212,35 @@ export default function ReactLab() {
   const saveNowRef = useRef(() => {});
   const formatRef = useRef(() => {});
   const [saveFlash, setSaveFlash] = useState(false);
+  const [submitState, setSubmitState] = useState(null); // null | "reviewing" | {result} | {error}
+  const [solvedIds, setSolvedIds] = useState(() => new Set());
 
   useEffect(() => { codeRef.current = code; }, [code]);
   useEffect(() => { activeRef.current = active; }, [active]);
+
+  // which challenges has this user already solved?
+  useEffect(() => {
+    if (!user) return;
+    api("/reactlab/summary", { auth: true })
+      .then((d) => setSolvedIds(new Set(d.solved)))
+      .catch(() => {});
+  }, [user]);
+
+  async function submitSolution() {
+    if (!active || active.isSandbox || showingSolution) return;
+    setSubmitState("reviewing");
+    try {
+      const data = await api("/reactlab/submit", {
+        method: "POST",
+        auth: true,
+        body: { challengeId: active.id, title: active.title, asked: active.asked, code },
+      });
+      setSubmitState(data);
+      if (data.passed) setSolvedIds((s) => new Set([...s, active.id]));
+    } catch (err) {
+      setSubmitState({ error: err.message });
+    }
+  }
 
   // local cache (also the guest fallback)
   useEffect(() => {
@@ -681,7 +707,11 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
                 <p>{ch.asked.split(".")[0]}.</p>
                 <div className="pgb-card-foot">
                   <span>⚛️ live preview</span>
-                  {saved[ch.id] && <span className="pgb-started">✓ started</span>}
+                  {solvedIds.has(ch.id) ? (
+                    <span className="pgb-solved">🏆 solved</span>
+                  ) : (
+                    saved[ch.id] && <span className="pgb-started">✓ started</span>
+                  )}
                 </div>
               </button>
             );
@@ -752,6 +782,11 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
             ✨ Format
           </button>
           <button className="btn btn-run" onClick={() => run()}>▶ Run</button>
+          {!active.isSandbox && !showingSolution && user && (
+            <button className="btn btn-primary" onClick={submitSolution} title="AI reviews your code against the requirements">
+              {solvedIds.has(active.id) ? "🚀 Re-submit" : "🚀 Submit"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -881,6 +916,59 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
           </div>
         </div>
       </div>
+
+      {/* AI review modal */}
+      {submitState && (
+        <div className="rlab-review-overlay" onClick={() => submitState !== "reviewing" && setSubmitState(null)}>
+          <div className="rlab-review-panel" onClick={(e) => e.stopPropagation()}>
+            {submitState === "reviewing" ? (
+              <div className="rlab-review-loading">
+                <div className="iv-eval-spinner">🧑‍⚖️</div>
+                <h3>Reviewing your solution…</h3>
+                <p>The AI interviewer is checking your code against the requirements.</p>
+              </div>
+            ) : submitState.error ? (
+              <>
+                <h3>⚠️ Submission failed</h3>
+                <p className="rlab-review-summary">{submitState.error}</p>
+                <div className="iv-actions">
+                  <button className="btn btn-primary" onClick={submitSolution}>Retry</button>
+                  <button className="btn btn-outline" onClick={() => setSubmitState(null)}>Close</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className={`rlab-review-verdict ${submitState.passed ? "pass" : "fail"}`}>
+                  <span className="rlab-review-icon">{submitState.passed ? "🎉" : "🔁"}</span>
+                  <div>
+                    <h3>{submitState.passed ? "ACCEPTED" : "NOT YET"} · {submitState.score}/10</h3>
+                    <p>{submitState.summary}</p>
+                  </div>
+                </div>
+                {submitState.feedback?.length > 0 && (
+                  <ul className="rlab-review-feedback">
+                    {submitState.feedback.map((f) => <li key={f}>{f}</li>)}
+                  </ul>
+                )}
+                <p className="iv-xp">+{submitState.xpGained} XP</p>
+                {submitState.newBadges?.length > 0 && (
+                  <p className="iv-new-badges">🎖 New badge: {submitState.newBadges.join(", ")}</p>
+                )}
+                <div className="iv-actions">
+                  <button className="btn btn-primary" onClick={() => setSubmitState(null)}>
+                    {submitState.passed ? "Nice! Continue" : "Keep improving"}
+                  </button>
+                  {!submitState.passed && (
+                    <button className="btn btn-outline" onClick={() => { setSubmitState(null); toggleSolution(); }}>
+                      💡 See solution
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -2074,6 +2074,36 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
   animation: fadeUp 0.2s ease both;
 }
 
+/* ---------- REACT LAB AI REVIEW ---------- */
+.pgb-solved { color: var(--primary); font-weight: 700; }
+.rlab-review-overlay {
+  position: fixed; inset: 0; z-index: 220;
+  background: rgba(4, 8, 18, 0.65); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: fadeUp 0.15s ease both;
+}
+.rlab-review-panel {
+  width: 100%; max-width: 520px;
+  background: var(--card, #101828); border: 1px solid var(--border);
+  border-radius: 16px; padding: 26px 28px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+}
+:root[data-theme="light"] .rlab-review-panel { background: #fff; }
+.rlab-review-loading { text-align: center; padding: 16px 0; }
+.rlab-review-loading p { color: var(--text-dim); font-size: 0.9rem; margin-top: 6px; }
+.rlab-review-verdict { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 14px; }
+.rlab-review-icon { font-size: 2.2rem; }
+.rlab-review-verdict h3 { font-size: 1.1rem; margin-bottom: 4px; }
+.rlab-review-verdict.pass h3 { color: var(--green); }
+.rlab-review-verdict.fail h3 { color: var(--primary); }
+.rlab-review-verdict p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.55; }
+.rlab-review-summary { color: var(--text-dim); margin: 10px 0 16px; }
+.rlab-review-feedback {
+  margin: 0 0 14px; padding-left: 20px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.rlab-review-feedback li { color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; }
+
 /* ---------- GAMIFICATION STRIP (dashboard) ---------- */
 .gamify-strip {
   display: grid; grid-template-columns: 1fr 1.2fr 1.4fr; gap: 14px;
