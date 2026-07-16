@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { BADGE_META, ALL_BADGE_IDS } from "../data/badges.js";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -10,6 +11,7 @@ export default function Dashboard() {
   const [bookmarks, setBookmarks] = useState([]);
   const [byCategory, setByCategory] = useState({});
   const [categories, setCategories] = useState([]);
+  const [gamify, setGamify] = useState(null);
 
   useEffect(() => {
     api("/progress", { auth: true })
@@ -21,12 +23,69 @@ export default function Dashboard() {
       .catch(() => {});
     api("/quiz/results/history", { auth: true }).then(setHistory).catch(() => {});
     api("/concepts/categories").then(setCategories).catch(() => {});
+    api("/gamify/me", { auth: true }).then(setGamify).catch(() => {});
   }, []);
 
   return (
     <div className="page">
       <h1>Welcome back, {user?.name?.split(" ")[0]} 👋</h1>
       <p className="page-sub">Here's where your prep stands.</p>
+
+      {gamify && (
+        <div className="gamify-strip">
+          <div className={`gamify-streak ${gamify.streak > 0 ? "alive" : ""}`}>
+            <span className="gamify-flame">🔥</span>
+            <div>
+              <strong>{gamify.streak} day{gamify.streak === 1 ? "" : "s"}</strong>
+              <span>
+                {gamify.activeToday
+                  ? "Streak safe for today!"
+                  : gamify.streak > 0
+                    ? "Practice today to keep it alive"
+                    : "Start a streak — do anything today"}
+              </span>
+              {gamify.longestStreak > 1 && (
+                <span className="gamify-best">Best: {gamify.longestStreak} days</span>
+              )}
+            </div>
+          </div>
+
+          <div className="gamify-level">
+            <div className="gamify-level-top">
+              <strong>⭐ Level {gamify.level}</strong>
+              <span>{gamify.xp} XP</span>
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${(gamify.xpIntoLevel / gamify.xpForNextLevel) * 100}%` }}
+              />
+            </div>
+            <span className="gamify-next">
+              {gamify.xpForNextLevel - gamify.xpIntoLevel} XP to level {gamify.level + 1}
+            </span>
+          </div>
+
+          <div className="gamify-badges">
+            <strong>🎖 Badges ({gamify.badges.length}/{ALL_BADGE_IDS.length})</strong>
+            <div className="badge-row">
+              {ALL_BADGE_IDS.map((id) => {
+                const meta = BADGE_META[id];
+                const earned = gamify.badges.includes(id);
+                return (
+                  <span
+                    key={id}
+                    className={`badge-chip ${earned ? "earned" : "locked"}`}
+                    title={`${meta.name} — ${meta.desc}${earned ? "" : " (locked)"}`}
+                  >
+                    {meta.icon}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {stats && (
         <div className="dash-grid">
