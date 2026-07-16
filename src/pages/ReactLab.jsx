@@ -206,6 +206,15 @@ export default function ReactLab() {
   const [renameValue, setRenameValue] = useState("");
   const myCodeRef = useRef(""); // user's code while viewing solution
   const syncTimers = useRef({});
+  const codeRef = useRef("");
+  const activeRef = useRef(null);
+  const prettierRef = useRef(null);
+  const saveNowRef = useRef(() => {});
+  const formatRef = useRef(() => {});
+  const [saveFlash, setSaveFlash] = useState(false);
+
+  useEffect(() => { codeRef.current = code; }, [code]);
+  useEffect(() => { activeRef.current = active; }, [active]);
 
   // local cache (also the guest fallback)
   useEffect(() => {
@@ -385,6 +394,149 @@ export default function ReactLab() {
     setSrcDoc(buildSrcDoc(source, deps ?? getDeps(active)));
     setRunId((r) => r + 1);
   }
+
+  /* ---------- editor superpowers: format, Ctrl+S, JSX intellisense ---------- */
+
+  // Prettier loaded lazily from CDN — zero bundle cost until first format
+  async function loadPrettier() {
+    if (prettierRef.current) return prettierRef.current;
+    const [prettier, babel, estree] = await Promise.all([
+      import(/* @vite-ignore */ "https://esm.sh/prettier@3.3.3/standalone"),
+      import(/* @vite-ignore */ "https://esm.sh/prettier@3.3.3/plugins/babel"),
+      import(/* @vite-ignore */ "https://esm.sh/prettier@3.3.3/plugins/estree"),
+    ]);
+    prettierRef.current = {
+      prettier: prettier.default ?? prettier,
+      plugins: [babel.default ?? babel, estree.default ?? estree],
+    };
+    return prettierRef.current;
+  }
+
+  async function formatCode() {
+    try {
+      const { prettier, plugins } = await loadPrettier();
+      const formatted = await prettier.format(codeRef.current, {
+        parser: "babel",
+        plugins,
+        semi: true,
+        singleQuote: false,
+        tabWidth: 2,
+        printWidth: 90,
+      });
+      onEdit(formatted);
+      return formatted;
+    } catch (err) {
+      // syntax error in code — show it in the console instead of failing silently
+      setLogs((l) => [...l.slice(-99), { level: "error", text: "✨ Format failed: " + String(err.message).split("\n")[0] }]);
+      return null;
+    }
+  }
+  useEffect(() => { formatRef.current = formatCode; });
+
+  // Ctrl+S — format, save to server instantly, flash "Saved ✓"
+  async function saveNow() {
+    const formatted = await formatRef.current();
+    const value = formatted ?? codeRef.current;
+    const act = activeRef.current;
+    if (act && user) {
+      clearTimeout(syncTimers.current[act.id]);
+      api(`/code/${act.id}`, { method: "PUT", auth: true, body: { code: value } }).catch(() => {});
+    }
+    setSaveFlash(true);
+    setTimeout(() => setSaveFlash(false), 1600);
+  }
+  useEffect(() => { saveNowRef.current = saveNow; });
+
+  // one-time Monaco setup, runs before the editor renders
+  function beforeEditorMount(monaco) {
+    if (monaco.__devprepJsxReady) return;
+    monaco.__devprepJsxReady = true;
+
+    // treat files as JSX → tag/attr IntelliSense from the TypeScript worker
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      target: monaco.languages.typescript.ScriptTarget.ES2020,
+      allowNonTsExtensions: true,
+      allowJs: true,
+      esModuleInterop: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+    });
+    // no red squiggles for sandbox-style imports; keep syntax errors visible
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: true,
+      noSyntaxValidation: false,
+    });
+    // globals available in the sandbox → autocomplete for hooks etc.
+    monaco.languages.typescript.javascriptDefaults.addExtraLib(
+      `declare const React: any;
+declare function useState<T = any>(initial?: T): [T, (v: T | ((p: T) => T)) => void];
+declare function useEffect(effect: () => void | (() => void), deps?: any[]): void;
+declare function useRef<T = any>(initial?: T): { current: T };
+declare function useMemo<T = any>(factory: () => T, deps?: any[]): T;
+declare function useCallback<T = any>(fn: T, deps?: any[]): T;
+declare function useContext(ctx: any): any;
+declare function useReducer(reducer: any, initial: any): [any, (action: any) => void];
+declare const axios: any;
+declare const _: any;
+declare module "react" { const anyExport: any; export = anyExport; }
+declare module "react-dom/client" { const anyExport: any; export = anyExport; }
+declare module "axios" { const anyExport: any; export = anyExport; }
+declare module "lodash" { const anyExport: any; export = anyExport; }
+declare module "react-router-dom" { const anyExport: any; export = anyExport; }
+declare module "dayjs" { const anyExport: any; export = anyExport; }
+`,
+      "file:///devprep-globals.d.ts"
+    );
+    // Shift+Alt+F / right-click "Format Document" → Prettier
+    monaco.languages.registerDocumentFormattingEditProvider("javascript", {
+      provideDocumentFormattingEdits: async (model) => {
+        try {
+          const { prettier, plugins } = await loadPrettier();
+          const text = await prettier.format(model.getValue(), {
+            parser: "babel", plugins, semi: true, singleQuote: false, tabWidth: 2, printWidth: 90,
+          });
+          return [{ range: model.getFullModelRange(), text }];
+        } catch { return []; }
+      },
+    });
+  }
+
+  // per-editor setup: Ctrl+S command + JSX auto-closing tags
+  function onEditorMount(editor, monaco) {
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => saveNowRef.current());
+
+    const VOID_TAGS = /^(br|hr|img|input|meta|link|area|base|col|embed|source|track|wbr)$/i;
+    editor.onDidChangeModelContent((e) => {
+      const change = e.changes[0];
+      if (!change || change.text !== ">") return;
+      const model = editor.getModel();
+      const pos = editor.getPosition();
+      if (!model || !pos) return;
+      const before = model.getLineContent(pos.lineNumber).slice(0, pos.column - 1);
+      // "<div className=..." right before the typed ">" → insert "</div>"
+      const m = before.match(/<([A-Za-z][A-Za-z0-9.]*)((?:\s[^<>]*)?)$/);
+      if (!m || m[2].trimEnd().endsWith("/") || VOID_TAGS.test(m[1])) return;
+      editor.executeEdits("jsx-autoclose", [
+        {
+          range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
+          text: `</${m[1]}>`,
+        },
+      ]);
+      editor.setPosition(pos); // keep the cursor between the tags
+    });
+  }
+
+  // Ctrl+S anywhere on the page (not just inside the editor)
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (activeRef.current) saveNowRef.current();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   function onEdit(value) {
     const v = value ?? "";
@@ -572,8 +724,12 @@ export default function ReactLab() {
           <span className={`level-badge ${diffClass(active.difficulty)}`}>{active.difficulty}</span>
         )}
         {showingSolution && <span className="rlab-solution-flag">👀 viewing solution</span>}
-        {user && synced && !showingSolution && (
-          <span className="rlab-sync" title="Your code auto-saves to your account">☁ synced</span>
+        {saveFlash ? (
+          <span className="rlab-sync rlab-saved-flash">✓ Saved</span>
+        ) : (
+          user && synced && !showingSolution && (
+            <span className="rlab-sync" title="Auto-saves while typing · Ctrl+S to format & save now">☁ synced</span>
+          )
         )}
         <div className="pgw-actions">
           <button className={`btn btn-outline pgw-brief-btn ${briefOpen ? "on" : ""}`} onClick={() => setBriefOpen(!briefOpen)}>
@@ -592,6 +748,9 @@ export default function ReactLab() {
               {showingSolution ? "← My code" : "💡 Solution"}
             </button>
           )}
+          <button className="btn btn-ghost" onClick={() => formatRef.current()} title="Prettier (also Shift+Alt+F or Ctrl+S)">
+            ✨ Format
+          </button>
           <button className="btn btn-run" onClick={() => run()}>▶ Run</button>
         </div>
       </div>
@@ -672,9 +831,12 @@ export default function ReactLab() {
           <Editor
             height="100%"
             language="javascript"
+            path="file:///devprep-app.jsx"
             theme="vs-dark"
             value={code}
             onChange={onEdit}
+            beforeMount={beforeEditorMount}
+            onMount={onEditorMount}
             options={{
               fontSize: 13.5,
               fontFamily: "JetBrains Mono, monospace",
@@ -683,6 +845,11 @@ export default function ReactLab() {
               padding: { top: 12 },
               tabSize: 2,
               wordWrap: "on",
+              quickSuggestions: { other: true, comments: false, strings: true },
+              suggestOnTriggerCharacters: true,
+              autoClosingBrackets: "always",
+              autoClosingQuotes: "always",
+              formatOnPaste: true,
             }}
           />
         </div>

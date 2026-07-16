@@ -2069,6 +2069,11 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
   .auth-brand { display: none; }
 }
 
+.rlab-saved-flash {
+  color: var(--green) !important; font-weight: 700;
+  animation: fadeUp 0.2s ease both;
+}
+
 /* ---------- GAMIFICATION STRIP (dashboard) ---------- */
 .gamify-strip {
   display: grid; grid-template-columns: 1fr 1.2fr 1.4fr; gap: 14px;
