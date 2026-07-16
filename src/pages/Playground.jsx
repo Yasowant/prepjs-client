@@ -3,6 +3,7 @@ import Editor from "@monaco-editor/react";
 import { PROBLEMS } from "../data/problems.js";
 import { PROJECTS_DATA } from "../data/projects.js";
 import { api } from "../api.js";
+import { useAuth } from "../context/AuthContext.jsx";
 
 function timeAgo(date) {
   const s = Math.floor((Date.now() - new Date(date)) / 1000);
@@ -206,6 +207,8 @@ export default function Playground() {
   const [submitting, setSubmitting] = useState(false);
   const workerRef = useRef(null);
   const submitModeRef = useRef(false);
+  const syncTimers = useRef({});
+  const { user } = useAuth();
 
   const allFiles = { ...SNIPPETS, ...customFiles };
 
@@ -215,6 +218,28 @@ export default function Playground() {
       .then((d) => setSolvedSet(new Set(d.solved)))
       .catch(() => {});
   }, []);
+
+  // logged in → pull saved solutions from the server (server wins)
+  useEffect(() => {
+    if (!user) return;
+    api("/code", { auth: true })
+      .then((serverMap) => {
+        const mine = {};
+        for (const [id, c] of Object.entries(serverMap)) {
+          if (!id.startsWith("rl-")) mine[id] = c; // playground ids
+        }
+        setSolutions((local) => ({ ...local, ...mine }));
+      })
+      .catch(() => {});
+  }, [user]);
+
+  function syncRemote(itemId, value) {
+    if (!user) return;
+    clearTimeout(syncTimers.current[itemId]);
+    syncTimers.current[itemId] = setTimeout(() => {
+      api(`/code/${itemId}`, { method: "PUT", auth: true, body: { code: value } }).catch(() => {});
+    }, 1500);
+  }
 
   function loadSubmissions(problemId) {
     api(`/submissions/${problemId}`, { auth: true })
@@ -254,6 +279,7 @@ export default function Playground() {
       if (active.data in customFiles) setCustomFiles((f) => ({ ...f, [active.data]: v }));
     } else {
       setSolutions((s) => ({ ...s, [active.data.id]: v }));
+      syncRemote(active.data.id, v); // persists to your account
     }
   }
 
@@ -265,6 +291,10 @@ export default function Playground() {
       delete next[active.data.id];
       return next;
     });
+    if (user) {
+      clearTimeout(syncTimers.current[active.data.id]);
+      api(`/code/${active.data.id}`, { method: "DELETE", auth: true }).catch(() => {});
+    }
     setCode(active.data.starter);
   }
 

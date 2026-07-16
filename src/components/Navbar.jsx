@@ -16,6 +16,8 @@ export default function Navbar() {
         <NavLink to="/concepts">Concepts</NavLink>
         <NavLink to="/questions">Q&A</NavLink>
         <NavLink to="/playground">Playground</NavLink>
+        <NavLink to="/react-lab">React Lab</NavLink>
+        <NavLink to="/visualizer">Visualizer</NavLink>
         {user && <NavLink to="/quiz">Quiz</NavLink>}
         {user && <NavLink to="/chat">AI Coach</NavLink>}
         {user && <NavLink to="/dashboard">Dashboard</NavLink>}

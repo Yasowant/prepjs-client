@@ -89,12 +89,12 @@ function TypingCode() {
 const FLOATERS = ["=>", "async", "{ }", "??", "...spread", "await", "this", "===", "[ ]", "npm run dev", "useState()", "console.log"];
 
 const FEATURES = [
-  { icon: "📚", title: "108+ Concepts, Zero Gaps", desc: "JavaScript from variables to V8 internals, React from JSX to concurrent rendering — with runnable code and real interview answers." },
-  { icon: "⚛️", title: "Full React Track", desc: "Hooks deep-dives, Virtual DOM, performance, Redux, React 18 — plus the most-asked React interview questions." },
-  { icon: "🎯", title: "315+ Q&A Bank", desc: "Every interview question in one place — filter by JS or React, search, and rehearse answers out loud." },
-  { icon: "⌨️", title: "VS Code Playground", desc: "The real Monaco editor in your browser. Coding problems with auto-tests, scenario projects, and a live terminal." },
-  { icon: "🤖", title: "AI Doubt Coach", desc: "Stuck on closures or useEffect at 2 AM? Ask anything — answers like a friendly senior dev, with code." },
-  { icon: "📈", title: "Progress Tracking", desc: "Quizzes with tricky traps, per-category progress bars, bookmarks — watch yourself become interview-ready." },
+  { icon: "📚", title: "108+ Concepts, Zero Gaps", desc: "JavaScript from variables to V8 internals, React from JSX to concurrent rendering — every concept explained with runnable code and the exact interview answer." },
+  { icon: "⚛️", title: "React Lab — Code It Live", desc: "15 machine-coding challenges (Todo, Debounce Search, Infinite Scroll…) with approach guides and solutions — write the component, watch the UI render live." },
+  { icon: "🎯", title: "315+ Interview Q&A Bank", desc: "Every question interviewers actually ask, with model answers — filter by JavaScript or React, search, and rehearse out loud." },
+  { icon: "⌨️", title: "Coding Playground + Judge", desc: "LeetCode-style problems with auto-tests and saved submissions, plus real-world projects: LRU cache, rate limiter, event emitter." },
+  { icon: "🤖", title: "AI Doubt Coach", desc: "Stuck on closures or useEffect at 2 AM? Ask anything — answers like a friendly senior dev, with code, saved like ChatGPT." },
+  { icon: "📈", title: "Progress That Follows You", desc: "Quizzes with tricky traps, per-category progress bars, and all your code saved to your account — pick up on any device." },
 ];
 
 const PREVIEWS = [
@@ -130,8 +130,8 @@ const FAQS = [
   ["Does it cover React or only JavaScript?", "Both, fully. The React track has 27 concepts and 100+ interview Q&A: JSX, hooks deep-dives, Virtual DOM, performance, Redux, React 18 concurrent features, and the most-asked practical scenario questions."],
   ["I'm a complete beginner. Will I understand it?", "Absolutely. Concepts are organized basic → intermediate → advanced. Start with JS Fundamentals, and several concepts (including JSX and useState) are open without even logging in."],
   ["How is this different from YouTube tutorials?", "Every concept is structured for interviews: explanation + runnable code + the actual Q&A interviewers ask. Plus a 315-question Q&A bank, quizzes to prove you retained it, and progress tracking to keep you honest."],
-  ["Does it cover machine coding rounds?", "Yes — polyfills (map, bind, Promise.all), debounce/throttle, deep clone, event emitters, coding problems with auto-tests, and scenario projects like LRU cache and rate limiters."],
-  ["Can I practice code inside DevPrep?", "Yes — the Playground is a real VS Code (Monaco) editor with coding problems, projects, runnable snippets and your own files, saved in your browser."],
+  ["Does it cover machine coding rounds?", "Yes, deeply — the React Lab has 15 live challenges (Counter, Todo, Debounce Search, Infinite Scroll, Employee Management…) with approach guides and full solutions, and the JS Playground has polyfills, LRU cache, rate limiters and more with auto-judged tests."],
+  ["Can I practice code inside DevPrep?", "Yes — write code in a real editor and run it instantly. React components render live in a preview with axios, react-router-dom and lodash preinstalled, and your code saves to your account so it's there on any device."],
 ];
 
 /* ---------- page ---------- */
@@ -171,12 +171,13 @@ export default function Landing() {
           <span className="pulse-dot" /> {stats.concepts}+ concepts · quizzes · playground · AI coach
         </div>
         <h1>
-          Master <span className="gradient-text shimmer">JavaScript & React</span>
-          <br /> from Basics to Interview-Ready
+          Crack Your <span className="gradient-text shimmer">JavaScript & React</span>
+          <br /> Interviews — In One Place
         </h1>
         <p className="hero-sub">
-          The complete frontend interview prep platform — every JS & React concept,
-          the traps, the polyfills, hooks deep-dives, a VS Code playground and a 24/7 AI coach.
+          Learn every concept with runnable code. Rehearse 315+ real interview questions
+          with answers. Solve machine-coding challenges in a live editor — and watch your
+          React UI render as you type. Free, forever.
         </p>
         <p className="hero-tagline">From <code>console.log</code> to offer letter. 🚀</p>
         <div className="hero-cta">
@@ -231,10 +232,32 @@ export default function Landing() {
       {/* STATS */}
       <section className="stats-strip">
         <div><CountUp to={stats.concepts} suffix="+" /><span>Concepts</span></div>
-        <div><CountUp to={2} /><span>Tracks: JS + React</span></div>
         <div><CountUp to={315} suffix="+" /><span>Interview Q&A</span></div>
+        <div><CountUp to={36} /><span>Coding Challenges</span></div>
         <div><CountUp to={99} /><span>Quiz Questions</span></div>
-        <div><CountUp to={21} /><span>Coding Problems & Projects</span></div>
+        <div><CountUp to={100} suffix="%" /><span>Free Forever</span></div>
+      </section>
+
+      {/* WHAT IS DEVPREP — clear explanation + SEO text */}
+      <section className="section seo-intro">
+        <Reveal>
+          <h2>What is <span className="gradient-text">DevPrep</span>?</h2>
+          <div className="seo-text">
+            <p>
+              DevPrep is a <strong>free JavaScript and React interview preparation platform</strong>.
+              Instead of scattered YouTube videos and blog posts, everything lives in one place:
+              concepts explained the way interviewers expect you to explain them, real interview
+              questions with model answers, and hands-on coding practice with instant feedback.
+            </p>
+            <p>
+              The flow is simple — <strong>Learn</strong> a concept with runnable code,{" "}
+              <strong>Rehearse</strong> its interview questions from the Q&A bank,{" "}
+              <strong>Practice</strong> it in the coding playground or React Lab, and{" "}
+              <strong>Prove</strong> it with quizzes and auto-judged submissions. Your progress
+              and code are saved to your account, so you can prepare from anywhere.
+            </p>
+          </div>
+        </Reveal>
       </section>
 
       {/* CATEGORIES */}
@@ -479,6 +502,9 @@ TERMINAL
             <Link to="/concepts?track=react">React Concepts</Link>
             <Link to="/questions">Q&A Bank</Link>
             <Link to="/playground">Playground</Link>
+            <Link to="/react-lab">React Lab</Link>
+            <Link to="/visualizer">Event Loop Visualizer</Link>
+            <Link to="/api">Public API</Link>
             <Link to="/quiz">Quizzes</Link>
             <Link to="/chat">AI Coach</Link>
           </div>

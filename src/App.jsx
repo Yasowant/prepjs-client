@@ -18,6 +18,9 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import About from "./pages/About.jsx";
 import Profile from "./pages/Profile.jsx";
 import Questions from "./pages/Questions.jsx";
+import ReactLab from "./pages/ReactLab.jsx";
+import Visualizer from "./pages/Visualizer.jsx";
+import ApiDocs from "./pages/ApiDocs.jsx";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -56,6 +59,9 @@ export default function App() {
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/reset" element={<ResetPassword />} />
         <Route path="/playground" element={<Playground />} />
+        <Route path="/react-lab" element={<ReactLab />} />
+        <Route path="/visualizer" element={<Visualizer />} />
+        <Route path="/api" element={<ApiDocs />} />
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Protected><Profile /></Protected>} />
         <Route path="/questions" element={<Protected><Questions /></Protected>} />
