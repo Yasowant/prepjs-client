@@ -2185,6 +2185,79 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
   display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
 }
 
+/* --- voice/video interview --- */
+.iv-video-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;
+}
+.iv-ai-card, .iv-user-card {
+  position: relative; border-radius: 16px; overflow: hidden;
+  background: #0d1322; border: 1px solid var(--border);
+  aspect-ratio: 16 / 10; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 10px;
+}
+:root[data-theme="light"] .iv-ai-card, :root[data-theme="light"] .iv-user-card { background: #eef2f8; }
+.iv-ai-card.speaking { border-color: var(--accent); box-shadow: 0 0 24px rgba(56, 189, 248, 0.18); }
+.iv-user-card.onair { border-color: var(--green); }
+.iv-ai-avatar { font-size: 3.4rem; }
+.iv-ai-card.speaking .iv-ai-avatar { animation: pulse 1.2s ease-in-out infinite; }
+.iv-ai-status { color: var(--text-dim); font-size: 0.8rem; }
+.iv-sound-bars { display: flex; gap: 4px; height: 18px; align-items: flex-end; }
+.iv-sound-bars span {
+  width: 4px; height: 4px; border-radius: 2px; background: var(--accent);
+  opacity: 0.35;
+}
+.iv-ai-card.speaking .iv-sound-bars span {
+  opacity: 1; animation: soundbar 0.9s ease-in-out infinite;
+}
+.iv-ai-card.speaking .iv-sound-bars span:nth-child(2) { animation-delay: 0.15s; }
+.iv-ai-card.speaking .iv-sound-bars span:nth-child(3) { animation-delay: 0.3s; }
+.iv-ai-card.speaking .iv-sound-bars span:nth-child(4) { animation-delay: 0.45s; }
+.iv-ai-card.speaking .iv-sound-bars span:nth-child(5) { animation-delay: 0.6s; }
+@keyframes soundbar { 0%,100% { height: 4px; } 50% { height: 18px; } }
+.iv-user-card video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transform: scaleX(-1); /* mirror like a call */
+}
+.iv-no-cam { color: var(--text-dim); text-align: center; font-size: 0.9rem; line-height: 1.8; }
+.iv-cam-label {
+  position: absolute; left: 10px; bottom: 8px; z-index: 2;
+  background: rgba(4, 8, 18, 0.65); color: #fff; font-size: 0.72rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 100px;
+}
+.iv-rec { color: #4ade80; font-style: normal; font-size: 0.66rem; margin-left: 6px; }
+.iv-repeat { margin-top: 12px; font-size: 0.8rem; padding: 6px 14px; }
+.iv-interim { color: var(--accent); font-size: 0.85rem; margin-top: 8px; font-style: italic; }
+@media (max-width: 720px) { .iv-video-row { grid-template-columns: 1fr; } .iv-ai-card { aspect-ratio: 16/7; } }
+
+/* --- interview history, replay & upload --- */
+.iv-history { display: flex; flex-direction: column; gap: 8px; }
+.iv-history-row {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px; color: var(--text);
+  transition: border-color 0.13s;
+}
+.iv-history-row:hover { border-color: var(--accent); }
+.iv-history-topic { font-weight: 600; font-size: 0.9rem; }
+.iv-history-topic em { color: var(--text-dim); font-style: normal; font-weight: 500; }
+.iv-history-signal { color: var(--text-dim); font-size: 0.82rem; }
+.iv-history-video { font-size: 0.95rem; }
+.iv-history-date { color: var(--text-dim); font-size: 0.78rem; margin-left: auto; }
+.iv-upload-bar {
+  border-radius: 10px; padding: 12px 16px; margin: 14px 0;
+  font-size: 0.9rem; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.iv-upload-bar.uploading { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35); color: var(--accent); }
+.iv-upload-bar.done { background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.35); color: var(--green); }
+.iv-upload-bar.failed, .iv-upload-bar.toobig { background: rgba(250, 204, 21, 0.08); border: 1px solid rgba(250, 204, 21, 0.35); color: var(--primary); }
+.iv-replay { margin-bottom: 20px; }
+.iv-replay-video {
+  width: 100%; max-height: 420px; border-radius: 14px;
+  border: 1px solid var(--border); background: #000;
+}
+.iv-back { color: var(--text-dim); font-size: 0.85rem; }
+.iv-back:hover { color: var(--text); }
+
 .iv-live-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .iv-progress { color: var(--text-dim); font-size: 0.88rem; font-weight: 600; }
 .iv-timer { font-family: var(--mono); font-size: 1.05rem; color: var(--green); font-weight: 700; }

@@ -22,6 +22,7 @@ import ReactLab from "./pages/ReactLab.jsx";
 import Visualizer from "./pages/Visualizer.jsx";
 import ApiDocs from "./pages/ApiDocs.jsx";
 import Interview from "./pages/Interview.jsx";
+import InterviewReview from "./pages/InterviewReview.jsx";
 import SearchPalette from "./components/SearchPalette.jsx";
 
 function Protected({ children }) {
@@ -69,6 +70,7 @@ export default function App() {
         <Route path="/profile" element={<Protected><Profile /></Protected>} />
         <Route path="/questions" element={<Protected><Questions /></Protected>} />
         <Route path="/interview" element={<Protected><Interview /></Protected>} />
+        <Route path="/interview/review/:id" element={<Protected><InterviewReview /></Protected>} />
         <Route path="/quiz" element={<Protected><Quiz /></Protected>} />
         <Route path="/quiz/review/:id" element={<Protected><QuizReview /></Protected>} />
         <Route path="/chat" element={<Protected><Chat /></Protected>} />
