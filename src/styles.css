@@ -90,9 +90,12 @@ button { font-family: inherit; cursor: pointer; }
 .brand svg { transition: transform 0.25s; }
 .brand:hover svg { transform: rotate(-8deg) scale(1.08); }
 .brand-accent { color: var(--primary); }
-.nav-links { display: flex; gap: 22px; }
-.nav-links a { color: var(--text-dim); font-weight: 500; }
-.nav-links a.active, .nav-links a:hover { color: var(--text); }
+.nav-links { display: flex; align-items: center; gap: 6px; }
+.nav-links > a {
+  color: var(--text-dim); font-weight: 500;
+  padding: 8px 12px; border-radius: 8px; line-height: 1.2;
+}
+.nav-links > a.active, .nav-links > a:hover { color: var(--text); background: rgba(56, 189, 248, 0.07); }
 .nav-auth { display: flex; align-items: center; gap: 12px; }
 .nav-user { color: var(--text-dim); font-size: 0.9rem; }
 .nav-user-link {
@@ -2260,16 +2263,19 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 .nav-drop { position: relative; }
 .nav-drop-btn {
   background: transparent; border: none; cursor: pointer; font-family: inherit;
-  color: var(--text-dim); font-weight: 500; font-size: 1rem; padding: 8px 2px;
-  display: flex; align-items: center; gap: 5px;
+  color: var(--text-dim); font-weight: 500; font-size: 1rem;
+  padding: 8px 12px; border-radius: 8px; line-height: 1.2;
+  display: flex; align-items: center; gap: 6px;
 }
-.nav-drop:hover .nav-drop-btn, .nav-drop.active .nav-drop-btn { color: var(--text); }
-.nav-caret { font-size: 0.6rem; transition: transform 0.15s; }
+.nav-drop:hover .nav-drop-btn, .nav-drop.active .nav-drop-btn {
+  color: var(--text); background: rgba(56, 189, 248, 0.07);
+}
+.nav-caret { font-size: 0.58rem; opacity: 0.7; transition: transform 0.15s; position: relative; top: 1px; }
 .nav-drop:hover .nav-caret { transform: rotate(180deg); }
 .nav-drop-menu {
   visibility: hidden; opacity: 0; transform: translateY(6px);
   transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s;
-  position: absolute; top: 100%; left: -10px; z-index: 80;
+  position: absolute; top: calc(100% + 4px); left: 0; z-index: 80;
   min-width: 205px; padding: 8px;
   background: var(--card, #101828); border: 1px solid var(--border);
   border-radius: 12px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
@@ -2278,6 +2284,10 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 :root[data-theme="light"] .nav-drop-menu { background: #fff; }
 .nav-drop:hover .nav-drop-menu, .nav-drop:focus-within .nav-drop-menu {
   visibility: visible; opacity: 1; transform: translateY(0);
+}
+/* invisible bridge so the menu doesn't close crossing the 4px gap */
+.nav-drop-menu::before {
+  content: ""; position: absolute; top: -8px; left: 0; right: 0; height: 8px;
 }
 .nav-drop-menu a {
   color: var(--text-dim); font-weight: 500; font-size: 0.92rem;
