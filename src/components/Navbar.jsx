@@ -1,8 +1,21 @@
 import { useState } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import Logo from "./Logo.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
+
+function Dropdown({ label, paths, children }) {
+  const location = useLocation();
+  const active = paths.some((p) => location.pathname.startsWith(p));
+  return (
+    <div className={`nav-drop ${active ? "active" : ""}`}>
+      <button className="nav-drop-btn" type="button">
+        {label} <span className="nav-caret">▾</span>
+      </button>
+      <div className="nav-drop-menu">{children}</div>
+    </div>
+  );
+}
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -11,29 +24,29 @@ export default function Navbar() {
 
   const close = () => setMenuOpen(false);
 
-  const links = (
-    <>
-      <NavLink to="/concepts" onClick={close}>Concepts</NavLink>
-      <NavLink to="/questions" onClick={close}>Q&A</NavLink>
-      <NavLink to="/playground" onClick={close}>Playground</NavLink>
-      <NavLink to="/react-lab" onClick={close}>React Lab</NavLink>
-      <NavLink to="/visualizer" onClick={close}>Visualizer</NavLink>
-      <NavLink to="/api" onClick={close}>Free API</NavLink>
-      {user && <NavLink to="/interview" onClick={close}>Interview</NavLink>}
-      {user && <NavLink to="/quiz" onClick={close}>Quiz</NavLink>}
-      {user && <NavLink to="/chat" onClick={close}>AI Coach</NavLink>}
-      {user && <NavLink to="/dashboard" onClick={close}>Dashboard</NavLink>}
-    </>
-  );
-
   return (
     <nav className="navbar">
       <Link to="/" className="brand" onClick={close}>
         <Logo size={30} /> Dev<span className="brand-accent">Prep</span>
       </Link>
 
-      {/* desktop links */}
-      <div className="nav-links">{links}</div>
+      {/* desktop links — grouped */}
+      <div className="nav-links">
+        <Dropdown label="Learn" paths={["/concepts", "/questions", "/quiz"]}>
+          <NavLink to="/concepts">📚 Concepts</NavLink>
+          <NavLink to="/questions">❓ Interview Q&A</NavLink>
+          {user && <NavLink to="/quiz">📝 Quiz</NavLink>}
+        </Dropdown>
+        <Dropdown label="Practice" paths={["/playground", "/react-lab", "/visualizer", "/interview"]}>
+          <NavLink to="/playground">💻 Playground</NavLink>
+          <NavLink to="/react-lab">⚛️ React Lab</NavLink>
+          <NavLink to="/visualizer">⏳ Visualizer</NavLink>
+          {user && <NavLink to="/interview">🎤 Mock Interview</NavLink>}
+        </Dropdown>
+        <NavLink to="/api">Free API</NavLink>
+        {user && <NavLink to="/chat">AI Coach</NavLink>}
+        {user && <NavLink to="/dashboard">Dashboard</NavLink>}
+      </div>
 
       <div className="nav-auth">
         <button
@@ -75,13 +88,25 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* mobile slide-down menu */}
+      {/* mobile slide-down menu — flat list */}
       {menuOpen && (
         <div className="nav-mobile">
-          {links}
+          <span className="nav-mobile-group">Learn</span>
+          <NavLink to="/concepts" onClick={close}>📚 Concepts</NavLink>
+          <NavLink to="/questions" onClick={close}>❓ Interview Q&A</NavLink>
+          {user && <NavLink to="/quiz" onClick={close}>📝 Quiz</NavLink>}
+          <span className="nav-mobile-group">Practice</span>
+          <NavLink to="/playground" onClick={close}>💻 Playground</NavLink>
+          <NavLink to="/react-lab" onClick={close}>⚛️ React Lab</NavLink>
+          <NavLink to="/visualizer" onClick={close}>⏳ Visualizer</NavLink>
+          {user && <NavLink to="/interview" onClick={close}>🎤 Mock Interview</NavLink>}
+          <span className="nav-mobile-group">More</span>
+          <NavLink to="/api" onClick={close}>🔌 Free API</NavLink>
+          {user && <NavLink to="/chat" onClick={close}>🤖 AI Coach</NavLink>}
+          {user && <NavLink to="/dashboard" onClick={close}>📊 Dashboard</NavLink>}
           {user ? (
             <>
-              <NavLink to="/profile" onClick={close}>Profile</NavLink>
+              <NavLink to="/profile" onClick={close}>👤 Profile</NavLink>
               <button className="btn btn-outline" onClick={() => { logout(); close(); navigate("/"); }}>
                 Logout
               </button>

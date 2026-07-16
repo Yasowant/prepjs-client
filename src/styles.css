@@ -2256,6 +2256,41 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 }
 @media (max-width: 720px) { .iv-topic-grid { grid-template-columns: 1fr; } }
 
+/* ---------- NAVBAR DROPDOWNS ---------- */
+.nav-drop { position: relative; }
+.nav-drop-btn {
+  background: transparent; border: none; cursor: pointer; font-family: inherit;
+  color: var(--text-dim); font-weight: 500; font-size: 1rem; padding: 8px 2px;
+  display: flex; align-items: center; gap: 5px;
+}
+.nav-drop:hover .nav-drop-btn, .nav-drop.active .nav-drop-btn { color: var(--text); }
+.nav-caret { font-size: 0.6rem; transition: transform 0.15s; }
+.nav-drop:hover .nav-caret { transform: rotate(180deg); }
+.nav-drop-menu {
+  visibility: hidden; opacity: 0; transform: translateY(6px);
+  transition: opacity 0.14s ease, transform 0.14s ease, visibility 0.14s;
+  position: absolute; top: 100%; left: -10px; z-index: 80;
+  min-width: 205px; padding: 8px;
+  background: var(--card, #101828); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+  display: flex; flex-direction: column; gap: 2px;
+}
+:root[data-theme="light"] .nav-drop-menu { background: #fff; }
+.nav-drop:hover .nav-drop-menu, .nav-drop:focus-within .nav-drop-menu {
+  visibility: visible; opacity: 1; transform: translateY(0);
+}
+.nav-drop-menu a {
+  color: var(--text-dim); font-weight: 500; font-size: 0.92rem;
+  padding: 9px 12px; border-radius: 8px; white-space: nowrap;
+}
+.nav-drop-menu a:hover { color: var(--text); background: rgba(56, 189, 248, 0.08); }
+.nav-drop-menu a.active { color: var(--text); background: rgba(56, 189, 248, 0.1); }
+
+.nav-mobile-group {
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-dim); margin: 10px 8px 2px;
+}
+
 /* ---------- NAVBAR EXTRAS (search btn, burger, mobile menu) ---------- */
 .nav-search-btn {
   display: flex; align-items: center; gap: 6px;
