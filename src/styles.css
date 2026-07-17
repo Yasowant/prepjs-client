@@ -1944,6 +1944,12 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 
 /* ---------- LOCKED CONCEPTS ---------- */
 .lock-badge { font-size: 0.9rem; }
+.qa-locked {
+  background: var(--card); border: 1px dashed rgba(250, 204, 21, 0.5);
+  border-radius: 14px; padding: 22px 24px;
+}
+.qa-locked p { color: var(--text-dim); line-height: 1.7; margin-bottom: 16px; }
+.qa-locked strong { color: var(--text); }
 .free-badge {
   font-size: 0.65rem; font-weight: 700; letter-spacing: 0.8px;
   color: var(--green); background: rgba(52, 211, 153, 0.14);

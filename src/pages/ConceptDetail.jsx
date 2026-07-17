@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import { setSEO } from "../utils/seo.js";
 
 export default function ConceptDetail() {
   const { id } = useParams();
@@ -9,24 +10,39 @@ export default function ConceptDetail() {
   const [concept, setConcept] = useState(null);
   const [status, setStatus] = useState(null);
   const [error, setError] = useState("");
-  const [lockedInfo, setLockedInfo] = useState(null);
 
   useEffect(() => {
     setConcept(null);
-    setLockedInfo(null);
     setError("");
     api(`/concepts/${id}`, { auth: Boolean(user) })
       .then(setConcept)
-      .catch((e) => {
-        if (e.code === "LOGIN_REQUIRED") setLockedInfo(e.data);
-        else setError(e.message);
-      });
+      .catch((e) => setError(e.message));
     if (user) {
       api("/progress", { auth: true })
         .then((d) => setStatus(d.entries.find((e) => e.conceptId === id)?.status ?? null))
         .catch(() => {});
     }
   }, [id, user]);
+
+  // per-concept SEO — each concept is its own Google landing page
+  useEffect(() => {
+    if (!concept) return;
+    setSEO({
+      title: `${concept.title} — Interview Questions & Explanation | DevPrep`,
+      description: concept.explanation,
+      path: `/concepts/${id}`,
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        headline: `${concept.title} — JavaScript/React Interview Preparation`,
+        description: String(concept.explanation || "").slice(0, 200),
+        url: `https://devprep.esscentra.in/concepts/${id}`,
+        author: { "@type": "Person", name: "Yasowant Nayak" },
+        publisher: { "@type": "Organization", name: "DevPrep" },
+        proficiencyLevel: concept.level,
+      },
+    });
+  }, [concept, id]);
 
   async function updateStatus(next) {
     if (!user) return;
@@ -37,35 +53,6 @@ export default function ConceptDetail() {
       await api(`/progress/${id}`, { method: "PUT", auth: true, body: { status: next } });
       setStatus(next);
     }
-  }
-
-  if (lockedInfo) {
-    return (
-      <div className="page">
-        <Link to="/concepts" className="back-link">← All concepts</Link>
-        <div className="lock-screen">
-          <div className="lock-glow" />
-          <div className="lock-icon">🔒</div>
-          <span className={`level-badge ${lockedInfo.level}`}>{lockedInfo.level}</span>
-          <h1>{lockedInfo.title}</h1>
-          <p className="lock-msg">
-            This concept is locked. Create a <strong>free account</strong> to unlock
-            all 76+ concepts, quizzes, progress tracking and the AI coach.
-          </p>
-          <div className="lock-preview">
-            <div className="lock-line" style={{ width: "92%" }} />
-            <div className="lock-line" style={{ width: "80%" }} />
-            <div className="lock-line" style={{ width: "86%" }} />
-            <div className="lock-line short" style={{ width: "55%" }} />
-          </div>
-          <div className="lock-actions">
-            <Link to="/login" className="btn btn-primary btn-lg">Login to Unlock</Link>
-            <Link to="/register" className="btn btn-outline btn-lg">Create Free Account</Link>
-          </div>
-          <p className="lock-hint">✨ Free forever — just verify your email.</p>
-        </div>
-      </div>
-    );
   }
 
   if (error) return <div className="page"><p className="empty">{error}</p></div>;
@@ -107,13 +94,27 @@ export default function ConceptDetail() {
       </section>
 
       <section className="detail-section">
-        <h2>🎯 Interview Questions</h2>
-        {concept.questions.map((qa, i) => (
-          <details className="qa" key={i}>
-            <summary>{qa.q}</summary>
-            <p>{qa.a}</p>
-          </details>
-        ))}
+        <h2>🎯 Interview Questions{concept.qaLocked ? ` (${concept.questionCount})` : ""}</h2>
+        {concept.qaLocked ? (
+          <div className="qa-locked">
+            <p>
+              🔒 <strong>{concept.questionCount} interview questions & answers</strong> on{" "}
+              {concept.title} are waiting — exactly how interviewers ask them, with model
+              answers. Free account, no card needed.
+            </p>
+            <div className="lock-actions">
+              <Link to="/register" className="btn btn-primary">Unlock free — see the answers</Link>
+              <Link to="/login" className="btn btn-outline">Login</Link>
+            </div>
+          </div>
+        ) : (
+          concept.questions.map((qa, i) => (
+            <details className="qa" key={i}>
+              <summary>{qa.q}</summary>
+              <p>{qa.a}</p>
+            </details>
+          ))
+        )}
       </section>
     </div>
   );

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { ROUTE_SEO, setSEO } from "./utils/seo.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Landing from "./pages/Landing.jsx";
@@ -33,6 +34,13 @@ function Protected({ children }) {
 
 export default function App() {
   const { loading } = useAuth();
+  const location = useLocation();
+
+  // per-route titles & meta (ConceptDetail sets its own richer tags after load)
+  useEffect(() => {
+    const meta = ROUTE_SEO[location.pathname];
+    if (meta) setSEO({ ...meta, path: location.pathname });
+  }, [location.pathname]);
 
   // hide the splash screen once the app is ready (min 1.4s so it's seen)
   useEffect(() => {
