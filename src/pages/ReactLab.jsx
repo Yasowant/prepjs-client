@@ -1,5 +1,12 @@
-import { useEffect, useRef, useState } from "react";
-import Editor from "@monaco-editor/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  SandpackProvider,
+  SandpackLayout,
+  SandpackCodeEditor,
+  SandpackPreview,
+  SandpackConsole,
+  useActiveCode,
+} from "@codesandbox/sandpack-react";
 import { Link } from "react-router-dom";
 import { REACT_CHALLENGES } from "../data/reactLab.js";
 import { api } from "../api.js";
@@ -10,30 +17,22 @@ const DEPS_KEY = "devprep-reactlab-deps";
 // first 2 challenges are free — the rest need a (free) account
 const FREE_IDS = new Set(REACT_CHALLENGES.slice(0, 2).map((c) => c.id));
 
-// Packages with optimized UMD bundles. Anything else loads from esm.sh.
-const KNOWN_PACKAGES = {
-  axios: { url: "https://unpkg.com/axios@1.7.7/dist/axios.min.js", version: "1.7.7" },
-  lodash: { url: "https://unpkg.com/lodash@4.17.21/lodash.min.js", version: "4.17.21" },
-  "react-router-dom": { url: "https://unpkg.com/react-router-dom@6.26.2/dist/umd/react-router-dom.production.min.js", version: "6.26.2" },
-  dayjs: { url: "https://unpkg.com/dayjs@1.11.13/dayjs.min.js", version: "1.11.13" },
-};
 const DEFAULT_DEPS = ["axios", "react-router-dom", "lodash"];
 
 const SB_PREFIX = "rl-sb-";
-const SANDBOX_TEMPLATE = `const { useState } = React;
+const SANDBOX_TEMPLATE = `import React, { useState } from "react";
 
-function App() {
+export default function App() {
   const [msg] = useState("Build anything here! 🚀");
 
   return (
-    <div>
+    <div style={{ fontFamily: "system-ui", padding: 8 }}>
       <h2>⚛️ My Sandbox</h2>
       <p>{msg}</p>
       <p>
-        Preinstalled packages — import them normally:<br />
-        <code>import axios from "axios"</code><br />
-        <code>import {"{ MemoryRouter, Routes, Route, Link }"} from "react-router-dom"</code><br />
-        <code>import _ from "lodash"</code>
+        This is a real bundler (the CodeSandbox engine) — install ANY npm
+        package from the 📦 panel and import it normally. The preview
+        hot-reloads as you type.
       </p>
     </div>
   );
@@ -51,31 +50,22 @@ function sandboxToChallenge(id) {
   };
 }
 
-// The sandbox runs code as a plain script, so `import` statements would crash.
-// Map imports of preinstalled packages to their CDN globals; strip the rest.
-function transformImports(code) {
-  return code
-    .replace(/import\s+React\s*,\s*\{([^}]*)\}\s*from\s*['"]react['"];?/g, "const {$1} = React;")
-    .replace(/import\s*\{([^}]*)\}\s*from\s*['"]react['"];?/g, "const {$1} = React;")
-    .replace(/import\s+React\s+from\s*['"]react['"];?/g, "")
-    .replace(/import\s+ReactDOM\s+from\s*['"]react-dom(\/client)?['"];?/g, "")
-    // packages with UMD globals 📦
-    .replace(/import\s+(\w+)\s+from\s*['"]axios['"];?/g, "const $1 = window.axios;")
-    .replace(/import\s*\{([^}]*)\}\s*from\s*['"]react-router-dom['"];?/g, "const {$1} = window.__RRD;")
-    .replace(/import\s+(\w+)\s+from\s*['"]lodash['"];?/g, "const $1 = window._;")
-    .replace(/import\s*\{([^}]*)\}\s*from\s*['"]lodash['"];?/g, "const {$1} = window._;")
-    .replace(/import\s+(\w+)\s+from\s*['"]dayjs['"];?/g, "const $1 = window.dayjs;")
-    // any OTHER npm package → load on the fly from esm.sh (like a real install)
-    .replace(/import\s+(\w+)\s*,\s*\{([^}]*)\}\s*from\s*['"]([^'".][^'"]*)['"];?/g,
-      'const { default: $1, $2 } = await import("https://esm.sh/$3");')
-    .replace(/import\s*\*\s*as\s+(\w+)\s+from\s*['"]([^'".][^'"]*)['"];?/g,
-      'const $1 = await import("https://esm.sh/$2");')
-    .replace(/import\s*\{([^}]*)\}\s*from\s*['"]([^'".][^'"]*)['"];?/g,
-      'const {$1} = await import("https://esm.sh/$2");')
-    .replace(/import\s+(\w+)\s+from\s*['"]([^'".][^'"]*)['"];?/g,
-      'const $1 = await import("https://esm.sh/$2").then(m => m.default ?? m);')
-    .replace(/export\s+default\s+/g, "")
-    .replace(/^\s*export\s+/gm, "");
+// Older DevPrep snippets were written for the legacy runtime (global React,
+// auto-mounted App, no exports). Upgrade them so they run in a real bundler.
+function modernize(src) {
+  let out = String(src || "");
+  const hasReactImport = /from\s+["']react["']/.test(out);
+  if (!hasReactImport) {
+    out = `import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";\n` + out;
+    // drop legacy global destructuring that would now redeclare the hooks
+    out = out.replace(/^\s*const\s*\{[^}]*\}\s*=\s*React;?\s*$/gm, "");
+  }
+  if (!/export\s+default/.test(out)) {
+    if (/function\s+App\s*\(/.test(out) || /const\s+App\s*=/.test(out)) {
+      out += `\n\nexport default App;`;
+    }
+  }
+  return out;
 }
 
 function loadSaved() {
@@ -86,106 +76,28 @@ function loadSaved() {
   }
 }
 
-const diffClass = (d) => (d === "easy" ? "basic" : d === "medium" ? "intermediate" : "advanced");
-
-// Build the sandboxed page: React 18 + Babel (pinned versions, classic JSX
-// runtime — automatic runtime would inject an `import`, which crashes plain scripts).
-function buildSrcDoc(rawCode, deps = DEFAULT_DEPS) {
-  const code = transformImports(rawCode)
-    .replace(/<\/script/gi, "<\\/script"); // don't let user code close our tag
-  const depScripts = deps
-    .filter((d) => KNOWN_PACKAGES[d])
-    .map((d) => `<script src="${KNOWN_PACKAGES[d].url}"><\/script>`)
-    .join("\n");
-  return `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8" />
-<script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"><\/script>
-<script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"><\/script>
-<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"><\/script>
-<!-- dependencies 📦 -->
-${depScripts}
-<script>
-  // BrowserRouter can't manage the URL inside a sandboxed preview —
-  // alias it to MemoryRouter so router code works unchanged.
-  window.__RRD = window.ReactRouterDOM
-    ? Object.assign({}, window.ReactRouterDOM, { BrowserRouter: window.ReactRouterDOM.MemoryRouter })
-    : {};
-<\/script>
-<style>
-  body { font-family: system-ui, sans-serif; padding: 18px; margin: 0; color: #111827; background: #ffffff; }
-  button { cursor: pointer; padding: 6px 12px; border-radius: 8px; border: 1px solid #d1d5db; background: #f9fafb; }
-  button:hover { background: #f3f4f6; }
-  input, select { padding: 6px 10px; border-radius: 8px; border: 1px solid #d1d5db; }
-  h1, h2, h3 { margin-top: 0; }
-</style>
-</head>
-<body>
-<div id="root"><p style="color:#9ca3af">Rendering…</p></div>
-<script type="text/plain" id="__user_code">${code}<\/script>
-<script>
-  const __send = (level, args) => {
-    try {
-      parent.postMessage({
-        source: "devprep-react-lab",
-        level,
-        text: args.map(a => {
-          if (typeof a === "string") return a;
-          try { return JSON.stringify(a); } catch { return String(a); }
-        }).join(" "),
-      }, "*");
-    } catch {}
-  };
-  ["log","info","warn","error"].forEach(l => {
-    const orig = console[l].bind(console);
-    console[l] = (...a) => { __send(l, a); orig(...a); };
-  });
-  const __fail = (msg) => {
-    __send("error", [String(msg)]);
-    document.getElementById("root").innerHTML =
-      '<pre style="color:#dc2626;white-space:pre-wrap;">❌ ' + String(msg) + "</pre>";
-  };
-  window.onerror = (msg, src, line) => __fail(msg + " (line " + line + ")");
-
-  window.addEventListener("DOMContentLoaded", async () => {
-    const source = document.getElementById("__user_code").textContent;
-    try {
-      // classic runtime → JSX compiles to React.createElement (no imports injected)
-      const compiled = Babel.transform(source, {
-        presets: [["react", { runtime: "classic" }]],
-        filename: "app.jsx",
-      }).code;
-
-      // async wrapper so esm.sh packages can be awaited at top level
-      const runner = new Function(
-        '"use strict"; return (async () => {\\n' + compiled +
-        "\\n;return (typeof App === 'undefined') ? undefined : App;\\n})()"
-      );
-      const AppComponent = await runner();
-
-      if (typeof AppComponent === "function") {
-        ReactDOM.createRoot(document.getElementById("root"))
-          .render(React.createElement(AppComponent));
-      } else {
-        document.getElementById("root").innerHTML =
-          '<p style="color:#dc2626">Define <b>function App() { ... }</b> — the sandbox mounts it automatically.</p>';
-      }
-    } catch (err) {
-      __fail(err.message);
-    }
-  });
-<\/script>
-</body>
-</html>`;
-}
-
 function loadDeps() {
   try {
     return JSON.parse(localStorage.getItem(DEPS_KEY)) || {};
   } catch {
     return {};
   }
+}
+
+const diffClass = (d) => (d === "easy" ? "basic" : d === "medium" ? "intermediate" : "advanced");
+
+// reports edits from inside Sandpack's editor up to React Lab
+function SandpackBridge({ onChange }) {
+  const { code } = useActiveCode();
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    onChange(code);
+  }, [code]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
 }
 
 export default function ReactLab() {
@@ -195,15 +107,17 @@ export default function ReactLab() {
   const [depInput, setDepInput] = useState("");
   const [active, setActive] = useState(null); // challenge or null (browse)
   const [code, setCode] = useState("");
+  const [extVersion, setExtVersion] = useState(0); // bump → remount Sandpack (external code set)
   const [showingSolution, setShowingSolution] = useState(false);
   const [briefOpen, setBriefOpen] = useState(true);
-  const [srcDoc, setSrcDoc] = useState("");
-  const [runId, setRunId] = useState(0);
-  const [logs, setLogs] = useState([]);
+  const [showConsole, setShowConsole] = useState(false);
   const [synced, setSynced] = useState(false);
   const [lockedChallenge, setLockedChallenge] = useState(null);
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
+  const [saveFlash, setSaveFlash] = useState(false);
+  const [submitState, setSubmitState] = useState(null); // null | "reviewing" | {result} | {error}
+  const [solvedIds, setSolvedIds] = useState(() => new Set());
   const myCodeRef = useRef(""); // user's code while viewing solution
   const syncTimers = useRef({});
   const codeRef = useRef("");
@@ -211,9 +125,6 @@ export default function ReactLab() {
   const prettierRef = useRef(null);
   const saveNowRef = useRef(() => {});
   const formatRef = useRef(() => {});
-  const [saveFlash, setSaveFlash] = useState(false);
-  const [submitState, setSubmitState] = useState(null); // null | "reviewing" | {result} | {error}
-  const [solvedIds, setSolvedIds] = useState(() => new Set());
 
   useEffect(() => { codeRef.current = code; }, [code]);
   useEffect(() => { activeRef.current = active; }, [active]);
@@ -269,17 +180,15 @@ export default function ReactLab() {
     if (!pkg || !active?.isSandbox) return;
     const deps = getDeps(active);
     if (deps.includes(pkg)) return setDepInput("");
-    const next = [...deps, pkg];
-    saveDeps(active.id, next);
+    saveDeps(active.id, [...deps, pkg]);
     setDepInput("");
-    run(code, next); // re-run with the new dependency loaded
+    setExtVersion((v) => v + 1); // remount bundler with the new dependency
   }
 
   function removeDep(pkg) {
     if (!active?.isSandbox) return;
-    const next = getDeps(active).filter((d) => d !== pkg);
-    saveDeps(active.id, next);
-    run(code, next);
+    saveDeps(active.id, getDeps(active).filter((d) => d !== pkg));
+    setExtVersion((v) => v + 1);
   }
 
   // logged in → load saved code + deps from the SERVER (server wins over local cache)
@@ -291,7 +200,7 @@ export default function ReactLab() {
         const deps = {};
         for (const [id, c] of Object.entries(serverMap)) {
           if (id.endsWith("::deps")) {
-            try { deps[id.replace("::deps", "")] = JSON.parse(c); } catch {}
+            try { deps[id.replace("::deps", "")] = JSON.parse(c); } catch { /* noop */ }
           } else if (id.startsWith("rl-")) {
             mine[id] = c;
           }
@@ -312,16 +221,6 @@ export default function ReactLab() {
     }, 1500);
   }
 
-  // receive console output from the iframe
-  useEffect(() => {
-    function onMessage(e) {
-      if (e.data?.source !== "devprep-react-lab") return;
-      setLogs((l) => [...l.slice(-99), { level: e.data.level, text: e.data.text }]);
-    }
-    window.addEventListener("message", onMessage);
-    return () => window.removeEventListener("message", onMessage);
-  }, []);
-
   function open(ch) {
     if (!user && !FREE_IDS.has(ch.id)) {
       setLockedChallenge(ch);
@@ -330,11 +229,8 @@ export default function ReactLab() {
     setActive(ch);
     setShowingSolution(false);
     setBriefOpen(true);
-    const initial = saved[ch.id] ?? ch.starter;
-    setCode(initial);
-    setLogs([]);
-    setSrcDoc(buildSrcDoc(initial, ch.isSandbox ? depsMap[ch.id] ?? DEFAULT_DEPS : DEFAULT_DEPS));
-    setRunId((r) => r + 1);
+    setCode(modernize(saved[ch.id] ?? ch.starter));
+    setExtVersion((v) => v + 1);
   }
 
   const sandboxIds = Object.keys(saved).filter((id) => id.startsWith(SB_PREFIX));
@@ -344,7 +240,6 @@ export default function ReactLab() {
       setLockedChallenge({ id: "new-sandbox", title: "New Sandbox", difficulty: "easy" });
       return;
     }
-    // auto-name: sandbox-1, sandbox-2, … (no popups)
     let n = 1;
     while (saved[`${SB_PREFIX}sandbox-${n}`]) n++;
     const id = `${SB_PREFIX}sandbox-${n}`;
@@ -370,7 +265,7 @@ export default function ReactLab() {
       api(`/code/${id}`, { method: "DELETE", auth: true }).catch(() => {});
       api(`/code/${id}::deps`, { method: "DELETE", auth: true }).catch(() => {});
     }
-    if (active?.id === id) setActive(null); // back to browse if it was open
+    if (active?.id === id) setActive(null);
   }
 
   function startRename() {
@@ -387,13 +282,12 @@ export default function ReactLab() {
     let newId = SB_PREFIX + slug;
     if (newId === active.id) return;
     let n = 2;
-    while (saved[newId]) newId = `${SB_PREFIX}${slug}-${n++}`; // avoid collisions
+    while (saved[newId]) newId = `${SB_PREFIX}${slug}-${n++}`;
 
     const oldId = active.id;
     const currentCode = code;
     const currentDeps = getDeps(active);
 
-    // move locally
     setSaved((s) => {
       const next = { ...s, [newId]: currentCode };
       delete next[oldId];
@@ -404,7 +298,6 @@ export default function ReactLab() {
       delete next[oldId];
       return next;
     });
-    // move on the server
     if (user) {
       clearTimeout(syncTimers.current[oldId]);
       api(`/code/${newId}`, { method: "PUT", auth: true, body: { code: currentCode } }).catch(() => {});
@@ -415,15 +308,35 @@ export default function ReactLab() {
     setActive(sandboxToChallenge(newId));
   }
 
-  function run(source = code, deps = null) {
-    setLogs([]);
-    setSrcDoc(buildSrcDoc(source, deps ?? getDeps(active)));
-    setRunId((r) => r + 1);
+  // edits coming from inside Sandpack's editor
+  function onEdit(value) {
+    const v = value ?? "";
+    setCode(v);
+    if (!showingSolution && activeRef.current) {
+      setSaved((s) => ({ ...s, [activeRef.current.id]: v }));
+      syncRemote(activeRef.current.id, v);
+    }
   }
 
-  /* ---------- editor superpowers: format, Ctrl+S, JSX intellisense ---------- */
+  function toggleSolution() {
+    if (!active) return;
+    if (showingSolution) {
+      setShowingSolution(false);
+      setCode(myCodeRef.current);
+    } else {
+      myCodeRef.current = code;
+      setShowingSolution(true);
+      setCode(modernize(active.solution));
+    }
+    setExtVersion((v) => v + 1);
+  }
 
-  // Prettier loaded lazily from CDN — zero bundle cost until first format
+  function restart() {
+    setExtVersion((v) => v + 1); // full bundler restart
+  }
+
+  /* ---------- Prettier format + Ctrl+S save ---------- */
+
   async function loadPrettier() {
     if (prettierRef.current) return prettierRef.current;
     const [prettier, babel, estree] = await Promise.all([
@@ -442,24 +355,17 @@ export default function ReactLab() {
     try {
       const { prettier, plugins } = await loadPrettier();
       const formatted = await prettier.format(codeRef.current, {
-        parser: "babel",
-        plugins,
-        semi: true,
-        singleQuote: false,
-        tabWidth: 2,
-        printWidth: 90,
+        parser: "babel", plugins, semi: true, singleQuote: false, tabWidth: 2, printWidth: 90,
       });
       onEdit(formatted);
+      setExtVersion((v) => v + 1); // push formatted code into the editor
       return formatted;
-    } catch (err) {
-      // syntax error in code — show it in the console instead of failing silently
-      setLogs((l) => [...l.slice(-99), { level: "error", text: "✨ Format failed: " + String(err.message).split("\n")[0] }]);
-      return null;
+    } catch {
+      return null; // syntax error — Sandpack's overlay already shows it
     }
   }
   useEffect(() => { formatRef.current = formatCode; });
 
-  // Ctrl+S — format, save to server instantly, flash "Saved ✓"
   async function saveNow() {
     const formatted = await formatRef.current();
     const value = formatted ?? codeRef.current;
@@ -473,86 +379,6 @@ export default function ReactLab() {
   }
   useEffect(() => { saveNowRef.current = saveNow; });
 
-  // one-time Monaco setup, runs before the editor renders
-  function beforeEditorMount(monaco) {
-    if (monaco.__devprepJsxReady) return;
-    monaco.__devprepJsxReady = true;
-
-    // treat files as JSX → tag/attr IntelliSense from the TypeScript worker
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      jsx: monaco.languages.typescript.JsxEmit.React,
-      target: monaco.languages.typescript.ScriptTarget.ES2020,
-      allowNonTsExtensions: true,
-      allowJs: true,
-      esModuleInterop: true,
-      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
-    });
-    // no red squiggles for sandbox-style imports; keep syntax errors visible
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-      noSemanticValidation: true,
-      noSyntaxValidation: false,
-    });
-    // globals available in the sandbox → autocomplete for hooks etc.
-    monaco.languages.typescript.javascriptDefaults.addExtraLib(
-      `declare const React: any;
-declare function useState<T = any>(initial?: T): [T, (v: T | ((p: T) => T)) => void];
-declare function useEffect(effect: () => void | (() => void), deps?: any[]): void;
-declare function useRef<T = any>(initial?: T): { current: T };
-declare function useMemo<T = any>(factory: () => T, deps?: any[]): T;
-declare function useCallback<T = any>(fn: T, deps?: any[]): T;
-declare function useContext(ctx: any): any;
-declare function useReducer(reducer: any, initial: any): [any, (action: any) => void];
-declare const axios: any;
-declare const _: any;
-declare module "react" { const anyExport: any; export = anyExport; }
-declare module "react-dom/client" { const anyExport: any; export = anyExport; }
-declare module "axios" { const anyExport: any; export = anyExport; }
-declare module "lodash" { const anyExport: any; export = anyExport; }
-declare module "react-router-dom" { const anyExport: any; export = anyExport; }
-declare module "dayjs" { const anyExport: any; export = anyExport; }
-`,
-      "file:///devprep-globals.d.ts"
-    );
-    // Shift+Alt+F / right-click "Format Document" → Prettier
-    monaco.languages.registerDocumentFormattingEditProvider("javascript", {
-      provideDocumentFormattingEdits: async (model) => {
-        try {
-          const { prettier, plugins } = await loadPrettier();
-          const text = await prettier.format(model.getValue(), {
-            parser: "babel", plugins, semi: true, singleQuote: false, tabWidth: 2, printWidth: 90,
-          });
-          return [{ range: model.getFullModelRange(), text }];
-        } catch { return []; }
-      },
-    });
-  }
-
-  // per-editor setup: Ctrl+S command + JSX auto-closing tags
-  function onEditorMount(editor, monaco) {
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => saveNowRef.current());
-
-    const VOID_TAGS = /^(br|hr|img|input|meta|link|area|base|col|embed|source|track|wbr)$/i;
-    editor.onDidChangeModelContent((e) => {
-      const change = e.changes[0];
-      if (!change || change.text !== ">") return;
-      const model = editor.getModel();
-      const pos = editor.getPosition();
-      if (!model || !pos) return;
-      const before = model.getLineContent(pos.lineNumber).slice(0, pos.column - 1);
-      // "<div className=..." right before the typed ">" → insert "</div>"
-      const m = before.match(/<([A-Za-z][A-Za-z0-9.]*)((?:\s[^<>]*)?)$/);
-      if (!m || m[2].trimEnd().endsWith("/") || VOID_TAGS.test(m[1])) return;
-      editor.executeEdits("jsx-autoclose", [
-        {
-          range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
-          text: `</${m[1]}>`,
-        },
-      ]);
-      editor.setPosition(pos); // keep the cursor between the tags
-    });
-  }
-
-  // Ctrl+S anywhere on the page (not just inside the editor)
   useEffect(() => {
     function onKey(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
@@ -563,30 +389,6 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  function onEdit(value) {
-    const v = value ?? "";
-    setCode(v);
-    if (!showingSolution && active) {
-      setSaved((s) => ({ ...s, [active.id]: v }));
-      syncRemote(active.id, v); // persists to your account
-    }
-  }
-
-  function toggleSolution() {
-    if (!active) return;
-    if (showingSolution) {
-      // back to my code
-      setShowingSolution(false);
-      setCode(myCodeRef.current);
-      run(myCodeRef.current);
-    } else {
-      myCodeRef.current = code;
-      setShowingSolution(true);
-      setCode(active.solution);
-      run(active.solution);
-    }
-  }
 
   function reset() {
     if (!active) return;
@@ -600,9 +402,19 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
       api(`/code/${active.id}`, { method: "DELETE", auth: true }).catch(() => {});
     }
     setShowingSolution(false);
-    setCode(active.starter);
-    run(active.starter);
+    setCode(modernize(active.starter));
+    setExtVersion((v) => v + 1);
   }
+
+  // stable files object — new identity ONLY on external code sets (not keystrokes)
+  const sandpackFiles = useMemo(
+    () => ({ "/App.js": code }),
+    [extVersion, active?.id] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const sandpackDeps = useMemo(
+    () => Object.fromEntries(getDeps(active).map((d) => [d, "latest"])),
+    [active, depsMap] // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   /* ============ LOCK SCREEN ============ */
   if (lockedChallenge) {
@@ -638,9 +450,9 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
         <div className="pgb-head">
           <h1>⚛️ React Lab</h1>
           <p>
-            The React machine-coding round, live — write the component, hit Run, and see
-            the real UI render beside your code. Read how it's asked, plan your approach,
-            build it, then compare with the solution.
+            The React machine-coding round, live — powered by the real CodeSandbox
+            bundler. Write the component and watch it hot-reload as you type, install
+            any npm package, then submit for an AI code review.
           </p>
         </div>
 
@@ -652,8 +464,8 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
         <div className="pgb-grid" style={{ marginBottom: 40 }}>
           {sandboxIds.length === 0 && (
             <p className="empty">
-              Blank React projects with a dependencies panel — add axios, dayjs, uuid
-              or almost any npm package, and build anything.
+              Blank React projects on a real bundler — install any npm package
+              and build anything, with hot reload as you type.
             </p>
           )}
           {sandboxIds.map((id) => (
@@ -706,7 +518,7 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
                 <h3>{ch.title}</h3>
                 <p>{ch.asked.split(".")[0]}.</p>
                 <div className="pgb-card-foot">
-                  <span>⚛️ live preview</span>
+                  <span>⚛️ hot reload</span>
                   {solvedIds.has(ch.id) ? (
                     <span className="pgb-solved">🏆 solved</span>
                   ) : (
@@ -778,10 +590,15 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
               {showingSolution ? "← My code" : "💡 Solution"}
             </button>
           )}
-          <button className="btn btn-ghost" onClick={() => formatRef.current()} title="Prettier (also Shift+Alt+F or Ctrl+S)">
+          <button className="btn btn-ghost" onClick={() => formatRef.current()} title="Prettier (also Ctrl+S)">
             ✨ Format
           </button>
-          <button className="btn btn-run" onClick={() => run()}>▶ Run</button>
+          <button className={`btn btn-ghost ${showConsole ? "btn-outline" : ""}`} onClick={() => setShowConsole(!showConsole)}>
+            🖥 Console
+          </button>
+          <button className="btn btn-run" onClick={restart} title="Full bundler restart (preview hot-reloads automatically as you type)">
+            ↻ Restart
+          </button>
           {!active.isSandbox && !showingSolution && user && (
             <button className="btn btn-primary" onClick={submitSolution} title="AI reviews your code against the requirements">
               {solvedIds.has(active.id) ? "🚀 Re-submit" : "🚀 Submit"}
@@ -801,7 +618,7 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
                   value={depInput}
                   onChange={(e) => setDepInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addDep(depInput)}
-                  placeholder="Add package… (e.g. dayjs, uuid)"
+                  placeholder="Add any npm package… (e.g. dayjs, uuid, zustand)"
                 />
                 <button className="btn btn-primary" onClick={() => addDep(depInput)}>＋</button>
               </div>
@@ -809,16 +626,16 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
               <div className="dep-list">
                 <div className="dep-row locked">
                   <span className="dep-name">react</span>
-                  <span className="dep-version">^18.3.1</span>
+                  <span className="dep-version">^18</span>
                 </div>
                 <div className="dep-row locked">
                   <span className="dep-name">react-dom</span>
-                  <span className="dep-version">^18.3.1</span>
+                  <span className="dep-version">^18</span>
                 </div>
                 {getDeps(active).map((d) => (
                   <div className="dep-row" key={d}>
                     <span className="dep-name">{d}</span>
-                    <span className="dep-version">{KNOWN_PACKAGES[d]?.version ?? "esm.sh"}</span>
+                    <span className="dep-version">latest</span>
                     <button className="dep-remove" onClick={() => removeDep(d)} title="Remove">🗑</button>
                   </div>
                 ))}
@@ -828,9 +645,9 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
             <div className="pg-problem-section">
               <h5>ℹ️ How it works</h5>
               <p className="pg-problem-statement">
-                Import any listed package normally. Packages without an optimized
-                bundle load on-demand from esm.sh when you import them — most npm
-                packages just work. Hit ▶ Run after changes.
+                This is the real CodeSandbox bundler running in your browser — every
+                package here is installed from npm for real. Add one, import it
+                normally, and the preview rebuilds automatically.
               </p>
             </div>
           </aside>
@@ -850,70 +667,50 @@ declare module "dayjs" { const anyExport: any; export = anyExport; }
               </ol>
             </div>
             <div className="pg-problem-section">
-              <h5>📏 Sandbox rules</h5>
+              <h5>📏 Rules</h5>
               <p className="pg-problem-statement">
-                Define <strong>function App()</strong> — it mounts automatically.{"\n"}
-                Hooks: <code>const {"{ useState }"} = React;</code> or import from "react".{"\n"}
-                📦 Preinstalled: <strong>axios</strong>, <strong>react-router-dom</strong>, <strong>lodash</strong> — import them normally.{"\n"}
-                Hit <strong>▶ Run</strong> to refresh the preview.
+                Build the component in <strong>App.js</strong> and keep{" "}
+                <code>export default App</code>.{"\n"}
+                The preview <strong>hot-reloads as you type</strong> — no Run button needed.{"\n"}
+                📦 Preinstalled: <strong>axios</strong>, <strong>react-router-dom</strong>,{" "}
+                <strong>lodash</strong>.{"\n"}
+                Done? Hit <strong>🚀 Submit</strong> for an AI code review.
               </p>
             </div>
           </aside>
         )}
 
-        {/* editor */}
-        <div className="rlab-editor">
-          <Editor
-            height="100%"
-            language="javascript"
-            path="file:///devprep-app.jsx"
-            theme="vs-dark"
-            value={code}
-            onChange={onEdit}
-            beforeMount={beforeEditorMount}
-            onMount={onEditorMount}
+        {/* the real CodeSandbox engine */}
+        <div className="rlab-sandpack">
+          <SandpackProvider
+            key={`${active.id}:${extVersion}`}
+            template="react"
+            theme="dark"
+            files={sandpackFiles}
+            customSetup={{ dependencies: sandpackDeps }}
             options={{
-              fontSize: 13.5,
-              fontFamily: "JetBrains Mono, monospace",
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              padding: { top: 12 },
-              tabSize: 2,
-              wordWrap: "on",
-              quickSuggestions: { other: true, comments: false, strings: true },
-              suggestOnTriggerCharacters: true,
-              autoClosingBrackets: "always",
-              autoClosingQuotes: "always",
-              formatOnPaste: true,
+              activeFile: "/App.js",
+              visibleFiles: ["/App.js"],
+              recompileMode: "delayed",
+              recompileDelay: 400,
             }}
-          />
-        </div>
-
-        {/* live preview */}
-        <div className="rlab-preview">
-          <div className="rlab-preview-title">
-            <span>PREVIEW</span>
-            <span className="rlab-live">● live</span>
-          </div>
-          <iframe
-            key={runId}
-            title="React preview"
-            className="rlab-iframe"
-            sandbox="allow-scripts allow-same-origin"
-            srcDoc={srcDoc}
-          />
-          <div className="rlab-console">
-            <div className="rlab-console-title">
-              <span>CONSOLE</span>
-              <button className="pg-clear" onClick={() => setLogs([])}>🗑 clear</button>
-            </div>
-            <div className="rlab-console-body">
-              {logs.length === 0 && <span className="pg-term-placeholder">console.log output appears here…</span>}
-              {logs.map((l, i) => (
-                <div key={i} className={`pg-term-line ${l.level}`}>{l.text}</div>
-              ))}
-            </div>
-          </div>
+          >
+            <SandpackBridge onChange={onEdit} />
+            <SandpackLayout className="rlab-sp-layout">
+              <SandpackCodeEditor
+                showLineNumbers
+                showInlineErrors
+                showTabs={false}
+                wrapContent
+              />
+              <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton />
+            </SandpackLayout>
+            {showConsole && (
+              <div className="rlab-console-panel">
+                <SandpackConsole resetOnPreviewRestart />
+              </div>
+            )}
+          </SandpackProvider>
         </div>
       </div>
 

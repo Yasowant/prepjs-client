@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -18,7 +18,7 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import About from "./pages/About.jsx";
 import Profile from "./pages/Profile.jsx";
 import Questions from "./pages/Questions.jsx";
-import ReactLab from "./pages/ReactLab.jsx";
+const ReactLab = lazy(() => import("./pages/ReactLab.jsx")); // Sandpack is heavy — load on demand
 import Visualizer from "./pages/Visualizer.jsx";
 import ApiDocs from "./pages/ApiDocs.jsx";
 import Interview from "./pages/Interview.jsx";
@@ -63,7 +63,14 @@ export default function App() {
         <Route path="/forgot" element={<ForgotPassword />} />
         <Route path="/reset" element={<ResetPassword />} />
         <Route path="/playground" element={<Playground />} />
-        <Route path="/react-lab" element={<ReactLab />} />
+        <Route
+          path="/react-lab"
+          element={
+            <Suspense fallback={<div className="page-loader">Loading React Lab…</div>}>
+              <ReactLab />
+            </Suspense>
+          }
+        />
         <Route path="/visualizer" element={<Visualizer />} />
         <Route path="/api" element={<ApiDocs />} />
         <Route path="/about" element={<About />} />
