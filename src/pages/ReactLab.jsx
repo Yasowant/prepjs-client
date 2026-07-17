@@ -126,8 +126,13 @@ export default function ReactLab() {
   const saveNowRef = useRef(() => {});
   const formatRef = useRef(() => {});
 
+  const showingSolutionRef = useRef(false);
+  const userRef = useRef(null);
+
   useEffect(() => { codeRef.current = code; }, [code]);
   useEffect(() => { activeRef.current = active; }, [active]);
+  useEffect(() => { showingSolutionRef.current = showingSolution; }, [showingSolution]);
+  useEffect(() => { userRef.current = user; }, [user]);
 
   // which challenges has this user already solved?
   useEffect(() => {
@@ -144,7 +149,7 @@ export default function ReactLab() {
       const data = await api("/reactlab/submit", {
         method: "POST",
         auth: true,
-        body: { challengeId: active.id, title: active.title, asked: active.asked, code },
+        body: { challengeId: active.id, title: active.title, asked: active.asked, code: codeRef.current },
       });
       setSubmitState(data);
       if (data.passed) setSolvedIds((s) => new Set([...s, active.id]));
@@ -285,7 +290,7 @@ export default function ReactLab() {
     while (saved[newId]) newId = `${SB_PREFIX}${slug}-${n++}`;
 
     const oldId = active.id;
-    const currentCode = code;
+    const currentCode = codeRef.current;
     const currentDeps = getDeps(active);
 
     setSaved((s) => {
@@ -308,27 +313,48 @@ export default function ReactLab() {
     setActive(sandboxToChallenge(newId));
   }
 
-  // edits coming from inside Sandpack's editor
+  // Edits from inside Sandpack's editor.
+  // CRITICAL: no setState per keystroke — re-rendering SandpackProvider mid-typing
+  // makes it reset the file to the props value, eating the user's input.
+  // Live value lives in codeRef; state + server sync commit on a debounce.
   function onEdit(value) {
     const v = value ?? "";
+    codeRef.current = v;
+    const act = activeRef.current;
+    if (!act || showingSolutionRef.current) return;
+    clearTimeout(syncTimers.current[act.id]);
+    syncTimers.current[act.id] = setTimeout(() => {
+      setCode(v);
+      setSaved((s) => ({ ...s, [act.id]: v }));
+      if (userRef.current) {
+        api(`/code/${act.id}`, { method: "PUT", auth: true, body: { code: v } }).catch(() => {});
+      }
+    }, 1200);
+  }
+
+  // programmatic code set (solution / format / reset) → remount the editor with it
+  function applyExternalCode(v, { persist = true } = {}) {
+    codeRef.current = v;
     setCode(v);
-    if (!showingSolution && activeRef.current) {
+    if (persist && activeRef.current && !showingSolutionRef.current) {
       setSaved((s) => ({ ...s, [activeRef.current.id]: v }));
       syncRemote(activeRef.current.id, v);
     }
+    setExtVersion((x) => x + 1);
   }
 
   function toggleSolution() {
     if (!active) return;
     if (showingSolution) {
       setShowingSolution(false);
-      setCode(myCodeRef.current);
+      showingSolutionRef.current = false;
+      applyExternalCode(myCodeRef.current);
     } else {
-      myCodeRef.current = code;
+      myCodeRef.current = codeRef.current;
       setShowingSolution(true);
-      setCode(modernize(active.solution));
+      showingSolutionRef.current = true;
+      applyExternalCode(modernize(active.solution), { persist: false });
     }
-    setExtVersion((v) => v + 1);
   }
 
   function restart() {
@@ -357,8 +383,7 @@ export default function ReactLab() {
       const formatted = await prettier.format(codeRef.current, {
         parser: "babel", plugins, semi: true, singleQuote: false, tabWidth: 2, printWidth: 90,
       });
-      onEdit(formatted);
-      setExtVersion((v) => v + 1); // push formatted code into the editor
+      applyExternalCode(formatted); // remounts the editor with formatted code
       return formatted;
     } catch {
       return null; // syntax error — Sandpack's overlay already shows it
@@ -402,18 +427,29 @@ export default function ReactLab() {
       api(`/code/${active.id}`, { method: "DELETE", auth: true }).catch(() => {});
     }
     setShowingSolution(false);
-    setCode(modernize(active.starter));
-    setExtVersion((v) => v + 1);
+    showingSolutionRef.current = false;
+    applyExternalCode(modernize(active.starter), { persist: false });
   }
 
-  // stable files object — new identity ONLY on external code sets (not keystrokes)
+  // EVERYTHING passed to SandpackProvider must be identity-stable across
+  // re-renders — fresh object identities make Sandpack reset the editor state
+  // (which eats keystrokes). New identities are created ONLY via extVersion.
   const sandpackFiles = useMemo(
     () => ({ "/App.js": code }),
     [extVersion, active?.id] // eslint-disable-line react-hooks/exhaustive-deps
   );
-  const sandpackDeps = useMemo(
-    () => Object.fromEntries(getDeps(active).map((d) => [d, "latest"])),
-    [active, depsMap] // eslint-disable-line react-hooks/exhaustive-deps
+  const sandpackCustomSetup = useMemo(
+    () => ({ dependencies: Object.fromEntries(getDeps(active).map((d) => [d, "latest"])) }),
+    [extVersion, active?.id] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const sandpackOptions = useMemo(
+    () => ({
+      activeFile: "/App.js",
+      visibleFiles: ["/App.js"],
+      recompileMode: "delayed",
+      recompileDelay: 400,
+    }),
+    []
   );
 
   /* ============ LOCK SCREEN ============ */
@@ -687,13 +723,8 @@ export default function ReactLab() {
             template="react"
             theme="dark"
             files={sandpackFiles}
-            customSetup={{ dependencies: sandpackDeps }}
-            options={{
-              activeFile: "/App.js",
-              visibleFiles: ["/App.js"],
-              recompileMode: "delayed",
-              recompileDelay: 400,
-            }}
+            customSetup={sandpackCustomSetup}
+            options={sandpackOptions}
           >
             <SandpackBridge onChange={onEdit} />
             <SandpackLayout className="rlab-sp-layout">
