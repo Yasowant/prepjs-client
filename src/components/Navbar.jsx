@@ -24,6 +24,45 @@ export default function Navbar() {
 
   const close = () => setMenuOpen(false);
 
+  // Logged in → navigation lives in the sidebar; slim top bar only
+  if (user) {
+    return (
+      <nav className="navbar navbar-app">
+        <button
+          className="nav-burger nav-burger-app"
+          aria-label="Menu"
+          onClick={() => window.dispatchEvent(new Event("toggle-sidebar"))}
+        >
+          ☰
+        </button>
+        <Link to="/" className="brand nav-brand-mobile">
+          <Logo size={26} /> Dev<span className="brand-accent">Prep</span>
+        </Link>
+        <div className="nav-auth">
+          <button
+            className="nav-search-btn"
+            title="Search (Ctrl+K)"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-search"))}
+          >
+            🔍 <kbd>Ctrl K</kbd>
+          </button>
+          <ThemeToggle />
+          <Link to="/profile" className="nav-user-link" title="Your profile">
+            {user.avatar ? (
+              <img src={user.avatar} alt="" className="nav-avatar nav-avatar-img" />
+            ) : (
+              <span className="nav-avatar">{user.name[0].toUpperCase()}</span>
+            )}
+            <span className="nav-user">{user.name.split(" ")[0]}</span>
+          </Link>
+          <button className="btn btn-ghost nav-logout" onClick={() => { logout(); navigate("/"); }}>
+            Logout
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
   return (
     <nav className="navbar">
       <Link to="/" className="brand" onClick={close}>

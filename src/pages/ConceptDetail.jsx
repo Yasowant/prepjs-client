@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { api } from "../api.js";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -10,10 +10,15 @@ export default function ConceptDetail() {
   const [concept, setConcept] = useState(null);
   const [status, setStatus] = useState(null);
   const [error, setError] = useState("");
+  const [note, setNote] = useState("");
+  const [noteState, setNoteState] = useState("idle"); // idle | saving | saved
+  const noteTimer = useRef(null);
 
   useEffect(() => {
     setConcept(null);
     setError("");
+    setNote("");
+    setNoteState("idle");
     api(`/concepts/${id}`, { auth: Boolean(user) })
       .then(setConcept)
       .catch((e) => setError(e.message));
@@ -21,8 +26,25 @@ export default function ConceptDetail() {
       api("/progress", { auth: true })
         .then((d) => setStatus(d.entries.find((e) => e.conceptId === id)?.status ?? null))
         .catch(() => {});
+      api(`/notes/${id}`, { auth: true })
+        .then((d) => setNote(d.text))
+        .catch(() => {});
     }
   }, [id, user]);
+
+  function onNoteChange(text) {
+    setNote(text);
+    setNoteState("saving");
+    clearTimeout(noteTimer.current);
+    noteTimer.current = setTimeout(() => {
+      api(`/notes/${id}`, { method: "PUT", auth: true, body: { text } })
+        .then(() => {
+          setNoteState("saved");
+          setTimeout(() => setNoteState("idle"), 1500);
+        })
+        .catch(() => setNoteState("idle"));
+    }, 1000);
+  }
 
   // per-concept SEO — each concept is its own Google landing page
   useEffect(() => {
@@ -116,6 +138,23 @@ export default function ConceptDetail() {
           ))
         )}
       </section>
+
+      {user && (
+        <section className="detail-section">
+          <h2>
+            📝 My notes{" "}
+            <span className="note-state">
+              {noteState === "saving" ? "saving…" : noteState === "saved" ? "✓ saved" : ""}
+            </span>
+          </h2>
+          <textarea
+            className="note-box"
+            value={note}
+            onChange={(e) => onNoteChange(e.target.value)}
+            placeholder={`Your own notes on ${concept.title} — tricks, mnemonics, interview stories. Auto-saves to your account.`}
+          />
+        </section>
+      )}
     </div>
   );
 }

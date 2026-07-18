@@ -86,6 +86,48 @@ function loadDeps() {
 
 const diffClass = (d) => (d === "easy" ? "basic" : d === "medium" ? "intermediate" : "advanced");
 
+// Sandpack theme matched to DevPrep's design system
+const DEVPREP_THEME = {
+  colors: {
+    surface1: "#0b1020",
+    surface2: "#1b2440",
+    surface3: "#141b2e",
+    clickable: "#8b98b8",
+    base: "#e2e8f0",
+    disabled: "#4a5568",
+    hover: "#ffffff",
+    accent: "#38bdf8",
+    error: "#f87171",
+    errorSurface: "#2d1620",
+  },
+  syntax: {
+    plain: "#e2e8f0",
+    comment: { color: "#64748b", fontStyle: "italic" },
+    keyword: "#c084fc",
+    tag: "#38bdf8",
+    punctuation: "#94a3b8",
+    definition: "#facc15",
+    property: "#7dd3fc",
+    static: "#fb923c",
+    string: "#34d399",
+  },
+  font: {
+    body: "Nunito, system-ui, sans-serif",
+    mono: '"JetBrains Mono", Menlo, Consolas, monospace',
+    size: "13.5px",
+    lineHeight: "1.65",
+  },
+};
+
+const CHECKLIST_KEY = "devprep-rl-checklist";
+function loadChecklist() {
+  try {
+    return JSON.parse(localStorage.getItem(CHECKLIST_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
 // reports edits from inside Sandpack's editor up to React Lab
 function SandpackBridge({ onChange }) {
   const { code } = useActiveCode();
@@ -118,6 +160,48 @@ export default function ReactLab() {
   const [saveFlash, setSaveFlash] = useState(false);
   const [submitState, setSubmitState] = useState(null); // null | "reviewing" | {result} | {error}
   const [solvedIds, setSolvedIds] = useState(() => new Set());
+  const [browseQuery, setBrowseQuery] = useState("");
+  const [browseDiff, setBrowseDiff] = useState("all");
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [editorPct, setEditorPct] = useState(55); // draggable split (%)
+  const [dragging, setDragging] = useState(false);
+  const [checklist, setChecklist] = useState(loadChecklist);
+  const splitRef = useRef(null);
+
+  useEffect(() => {
+    localStorage.setItem(CHECKLIST_KEY, JSON.stringify(checklist));
+  }, [checklist]);
+
+  function toggleStep(chId, i) {
+    setChecklist((c) => {
+      const cur = new Set(c[chId] || []);
+      cur.has(i) ? cur.delete(i) : cur.add(i);
+      return { ...c, [chId]: [...cur] };
+    });
+  }
+
+  function startDrag(e) {
+    e.preventDefault();
+    const el = splitRef.current;
+    if (!el) return;
+    setDragging(true);
+    const rect = el.getBoundingClientRect();
+    const move = (ev) => {
+      const x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      setEditorPct(Math.min(75, Math.max(28, ((x - rect.left) / rect.width) * 100)));
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("touchmove", move);
+      window.removeEventListener("touchend", up);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("touchmove", move);
+    window.addEventListener("touchend", up);
+  }
   const myCodeRef = useRef(""); // user's code while viewing solution
   const syncTimers = useRef({});
   const codeRef = useRef("");
@@ -537,9 +621,45 @@ export default function ReactLab() {
 
         <div className="pgb-myfiles-head">
           <h2>🏆 Challenges</h2>
+          {user && (
+            <div className="rlab-progress">
+              <span>{solvedIds.size}/{REACT_CHALLENGES.length} solved</span>
+              <div className="progress-bar">
+                <div
+                  className={`progress-fill ${solvedIds.size === REACT_CHALLENGES.length ? "full" : ""}`}
+                  style={{ width: `${(solvedIds.size / REACT_CHALLENGES.length) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* search + difficulty filter */}
+        <div className="rlab-filters">
+          <input
+            className="rlab-search"
+            value={browseQuery}
+            onChange={(e) => setBrowseQuery(e.target.value)}
+            placeholder="🔍 Search challenges… (todo, debounce, table)"
+          />
+          {["all", "easy", "medium", "hard"].map((d) => (
+            <button
+              key={d}
+              className={`chip small rlab-diff-chip ${browseDiff === d ? "on" : ""}`}
+              onClick={() => setBrowseDiff(d)}
+            >
+              {d === "all" ? "All" : d}
+            </button>
+          ))}
+        </div>
+
         <div className="pgb-grid">
-          {REACT_CHALLENGES.map((ch, i) => {
+          {REACT_CHALLENGES.filter((ch) => {
+            if (browseDiff !== "all" && ch.difficulty !== browseDiff) return false;
+            const q = browseQuery.trim().toLowerCase();
+            return !q || ch.title.toLowerCase().includes(q) || ch.asked.toLowerCase().includes(q);
+          }).map((ch) => {
+            const i = REACT_CHALLENGES.indexOf(ch);
             const locked = !user && !FREE_IDS.has(ch.id);
             return (
               <button className={`pgb-card ${locked ? "locked" : ""}`} key={ch.id} onClick={() => open(ch)}>
@@ -611,30 +731,43 @@ export default function ReactLab() {
         )}
         <div className="pgw-actions">
           <button className={`btn btn-outline pgw-brief-btn ${briefOpen ? "on" : ""}`} onClick={() => setBriefOpen(!briefOpen)}>
-            {active.isSandbox
-              ? `📦 ${briefOpen ? "Hide" : "Show"} deps`
-              : `📋 ${briefOpen ? "Hide" : "Show"} brief`}
+            {active.isSandbox ? "📦 Deps" : "📋 Brief"}
           </button>
-          <button className="btn btn-ghost" onClick={reset}>↺ Reset</button>
-          {active.isSandbox && (
-            <button className="btn btn-ghost sb-delete-btn" onClick={() => deleteSandbox(active.id)}>
-              🗑 Delete
-            </button>
-          )}
           {!active.isSandbox && (
             <button className={`btn ${showingSolution ? "btn-primary" : "btn-outline"}`} onClick={toggleSolution}>
               {showingSolution ? "← My code" : "💡 Solution"}
             </button>
           )}
-          <button className="btn btn-ghost" onClick={() => formatRef.current()} title="Prettier (also Ctrl+S)">
-            ✨ Format
-          </button>
           <button className={`btn btn-ghost ${showConsole ? "btn-outline" : ""}`} onClick={() => setShowConsole(!showConsole)}>
             🖥 Console
           </button>
-          <button className="btn btn-run" onClick={restart} title="Full bundler restart (preview hot-reloads automatically as you type)">
-            ↻ Restart
-          </button>
+
+          {/* overflow menu — secondary & destructive actions */}
+          <div className="rlab-more">
+            <button className="btn btn-ghost" onClick={() => setMoreOpen(!moreOpen)} title="More actions">⋯</button>
+            {moreOpen && (
+              <>
+                <div className="rlab-more-backdrop" onClick={() => setMoreOpen(false)} />
+                <div className="rlab-more-menu">
+                  <button onClick={() => { setMoreOpen(false); formatRef.current(); }}>
+                    ✨ Format code <kbd>Ctrl S</kbd>
+                  </button>
+                  <button onClick={() => { setMoreOpen(false); restart(); }}>
+                    ↻ Restart bundler
+                  </button>
+                  <button onClick={() => { setMoreOpen(false); reset(); }}>
+                    ⚠️ Reset to starter
+                  </button>
+                  {active.isSandbox && (
+                    <button className="danger" onClick={() => { setMoreOpen(false); deleteSandbox(active.id); }}>
+                      🗑 Delete sandbox
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
           {!active.isSandbox && !showingSolution && user && (
             <button className="btn btn-primary" onClick={submitSolution} title="AI reviews your code against the requirements">
               {solvedIds.has(active.id) ? "🚀 Re-submit" : "🚀 Submit"}
@@ -697,10 +830,22 @@ export default function ReactLab() {
               <p className="pg-problem-statement">{active.asked}</p>
             </div>
             <div className="pg-problem-section">
-              <h5>🧠 How to approach it</h5>
-              <ol className="pg-req-list rlab-approach">
-                {active.approach.map((a) => <li key={a}>{a}</li>)}
-              </ol>
+              <h5>🧠 How to approach it — tick as you go</h5>
+              <div className="rlab-steps">
+                {active.approach.map((a, i) => {
+                  const done = (checklist[active.id] || []).includes(i);
+                  return (
+                    <label className={`rlab-step ${done ? "done" : ""}`} key={a}>
+                      <input
+                        type="checkbox"
+                        checked={done}
+                        onChange={() => toggleStep(active.id, i)}
+                      />
+                      <span>{a}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
             <div className="pg-problem-section">
               <h5>📏 Rules</h5>
@@ -717,11 +862,21 @@ export default function ReactLab() {
         )}
 
         {/* the real CodeSandbox engine */}
-        <div className="rlab-sandpack">
+        <div
+          className={`rlab-sandpack ${dragging ? "dragging" : ""}`}
+          ref={splitRef}
+          style={{ "--ed-pct": `${editorPct}%` }}
+        >
+          <div
+            className="rlab-divider"
+            onMouseDown={startDrag}
+            onTouchStart={startDrag}
+            title="Drag to resize"
+          />
           <SandpackProvider
             key={`${active.id}:${extVersion}`}
             template="react"
-            theme="dark"
+            theme={DEVPREP_THEME}
             files={sandpackFiles}
             customSetup={sandpackCustomSetup}
             options={sandpackOptions}

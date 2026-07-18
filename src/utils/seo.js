@@ -86,6 +86,11 @@ export const ROUTE_SEO = {
     description:
       "Take a realistic mock interview: the AI asks questions out loud, you answer on camera, and get scored feedback with model answers. Free.",
   },
+  "/leaderboard": {
+    title: "Leaderboard — Top JavaScript & React Learners | DevPrep",
+    description:
+      "See the top DevPrep learners ranked by XP from quizzes, coding problems and mock interviews. Practice daily to climb the board.",
+  },
   "/questions": {
     title: "315+ JavaScript & React Interview Questions with Answers | DevPrep",
     description:

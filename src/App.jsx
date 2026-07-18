@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ROUTE_SEO, setSEO } from "./utils/seo.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import Navbar from "./components/Navbar.jsx";
+import Sidebar from "./components/Sidebar.jsx";
 import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -24,6 +25,8 @@ import Visualizer from "./pages/Visualizer.jsx";
 import ApiDocs from "./pages/ApiDocs.jsx";
 import Interview from "./pages/Interview.jsx";
 import InterviewReview from "./pages/InterviewReview.jsx";
+import Flashcards from "./pages/Flashcards.jsx";
+import Leaderboard from "./pages/Leaderboard.jsx";
 import SearchPalette from "./components/SearchPalette.jsx";
 
 function Protected({ children }) {
@@ -33,8 +36,16 @@ function Protected({ children }) {
 }
 
 export default function App() {
-  const { loading } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  const [sbCollapsed, setSbCollapsed] = useState(
+    () => localStorage.getItem("devprep-sb-collapsed") === "1"
+  );
+  const toggleSidebar = () =>
+    setSbCollapsed((c) => {
+      localStorage.setItem("devprep-sb-collapsed", c ? "0" : "1");
+      return !c;
+    });
 
   // per-route titles & meta (ConceptDetail sets its own richer tags after load)
   useEffect(() => {
@@ -57,7 +68,8 @@ export default function App() {
   }, [loading]);
 
   return (
-    <>
+    <div className={user ? `app-shell ${sbCollapsed ? "sb-collapsed" : ""}` : undefined}>
+      {user && <Sidebar collapsed={sbCollapsed} onToggle={toggleSidebar} />}
       <Navbar />
       <SearchPalette />
       <Routes>
@@ -84,6 +96,8 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/profile" element={<Protected><Profile /></Protected>} />
         <Route path="/questions" element={<Protected><Questions /></Protected>} />
+        <Route path="/flashcards" element={<Protected><Flashcards /></Protected>} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/interview" element={<Protected><Interview /></Protected>} />
         <Route path="/interview/review/:id" element={<Protected><InterviewReview /></Protected>} />
         <Route path="/quiz" element={<Protected><Quiz /></Protected>} />
@@ -91,6 +105,6 @@ export default function App() {
         <Route path="/chat" element={<Protected><Chat /></Protected>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </>
+    </div>
   );
 }
