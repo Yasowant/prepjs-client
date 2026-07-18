@@ -26,6 +26,7 @@ import ApiDocs from "./pages/ApiDocs.jsx";
 import Interview from "./pages/Interview.jsx";
 import InterviewReview from "./pages/InterviewReview.jsx";
 import Flashcards from "./pages/Flashcards.jsx";
+import Certificate from "./pages/Certificate.jsx";
 import Leaderboard from "./pages/Leaderboard.jsx";
 import SearchPalette from "./components/SearchPalette.jsx";
 
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="/profile" element={<Protected><Profile /></Protected>} />
         <Route path="/questions" element={<Protected><Questions /></Protected>} />
         <Route path="/flashcards" element={<Protected><Flashcards /></Protected>} />
+        <Route path="/certificate/:track" element={<Protected><Certificate /></Protected>} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/interview" element={<Protected><Interview /></Protected>} />
         <Route path="/interview/review/:id" element={<Protected><InterviewReview /></Protected>} />

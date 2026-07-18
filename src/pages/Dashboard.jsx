@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [byCategory, setByCategory] = useState({});
   const [categories, setCategories] = useState([]);
   const [gamify, setGamify] = useState(null);
+  const [certs, setCerts] = useState(null);
 
   useEffect(() => {
     api("/progress", { auth: true })
@@ -24,6 +25,7 @@ export default function Dashboard() {
     api("/quiz/results/history", { auth: true }).then(setHistory).catch(() => {});
     api("/concepts/categories").then(setCategories).catch(() => {});
     api("/gamify/me", { auth: true }).then(setGamify).catch(() => {});
+    api("/gamify/certificates", { auth: true }).then(setCerts).catch(() => {});
   }, []);
 
   return (
@@ -109,6 +111,38 @@ export default function Dashboard() {
             <span className="dash-label">Quizzes taken</span>
           </div>
         </div>
+      )}
+
+      {certs && (
+        <section className="dash-certs">
+          <h2>🎓 Certificates</h2>
+          <div className="cert-grid">
+            {certs.tracks.map((t) => (
+              <Link
+                to={`/certificate/${t.id}`}
+                className={`cert-card ${t.earned ? "earned" : ""}`}
+                key={t.id}
+              >
+                <span className="cert-icon">{t.earned ? "🏅" : "🎯"}</span>
+                <div className="cert-card-body">
+                  <strong>{t.name}</strong>
+                  {t.earned ? (
+                    <span className="cert-earned-text">Earned! View & download →</span>
+                  ) : (
+                    <>
+                      <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: `${t.percent}%` }} />
+                      </div>
+                      <span className="cert-progress-text">
+                        {t.completed}/{t.total} concepts · {t.total - t.completed} to go
+                      </span>
+                    </>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       {categories.length > 0 && Object.keys(byCategory).length > 0 && (

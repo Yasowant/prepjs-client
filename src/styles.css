@@ -2534,6 +2534,38 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 .lb-gap { text-align: center; color: var(--text-dim); }
 @media (max-width: 640px) { .lb-streak, .lb-badges { display: none; } }
 
+/* ---------- CERTIFICATES ---------- */
+.dash-certs { margin: 8px 0 26px; }
+.dash-certs h2 { margin-bottom: 12px; }
+.cert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.cert-card {
+  display: flex; gap: 14px; align-items: center;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 18px; color: var(--text);
+  transition: border-color 0.14s, transform 0.14s;
+}
+.cert-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.cert-card.earned { border-color: rgba(250, 204, 21, 0.5); background: rgba(250, 204, 21, 0.05); }
+.cert-icon { font-size: 1.9rem; }
+.cert-card-body { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.cert-earned-text { color: var(--primary); font-size: 0.85rem; font-weight: 600; }
+.cert-progress-text { color: var(--text-dim); font-size: 0.78rem; }
+.cert-page { max-width: 900px; }
+.cert-canvas {
+  width: 100%; height: auto; border-radius: 14px;
+  border: 1px solid var(--border); margin: 18px 0;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+.cert-locked {
+  background: var(--card); border: 1px dashed rgba(250, 204, 21, 0.5);
+  border-radius: 14px; padding: 26px 28px; margin-top: 14px;
+  display: flex; flex-direction: column; gap: 14px; max-width: 560px;
+}
+.cert-locked p { color: var(--text-dim); line-height: 1.65; }
+.cert-locked strong { color: var(--text); }
+.cert-locked .btn { align-self: flex-start; }
+.cert-hint { color: var(--text-dim); font-size: 0.83rem; margin-top: 12px; }
+
 /* ---------- CONCEPT NOTES ---------- */
 .note-state { color: var(--green); font-size: 0.78rem; font-weight: 600; margin-left: 8px; }
 .note-box {
