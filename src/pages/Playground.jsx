@@ -633,9 +633,25 @@ export default function Playground() {
             <Editor
               height="100%"
               language="javascript"
+              path="file:///devprep-playground.js"
               theme="vs-dark"
               value={code}
               onChange={onEdit}
+              beforeMount={(monaco) => {
+                if (monaco.__devprepPgReady) return;
+                monaco.__devprepPgReady = true;
+                // browser + ES2020 typings → setTimeout, fetch, Promise all autocomplete
+                monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+                  target: monaco.languages.typescript.ScriptTarget.ES2020,
+                  allowNonTsExtensions: true,
+                  allowJs: true,
+                  lib: ["es2020", "dom"],
+                });
+                monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                  noSemanticValidation: true, // no red squiggles for snippet-style code
+                  noSyntaxValidation: false,
+                });
+              }}
               options={{
                 fontSize: 14,
                 fontFamily: "JetBrains Mono, monospace",
@@ -645,6 +661,13 @@ export default function Playground() {
                 tabSize: 2,
                 smoothScrolling: true,
                 cursorBlinking: "smooth",
+                quickSuggestions: { other: true, comments: false, strings: true },
+                suggestOnTriggerCharacters: true,
+                wordBasedSuggestions: "allDocuments",
+                snippetSuggestions: "inline",
+                parameterHints: { enabled: true },
+                suggestSelection: "first",
+                tabCompletion: "on",
               }}
             />
           </div>

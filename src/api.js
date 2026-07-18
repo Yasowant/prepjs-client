@@ -26,6 +26,7 @@ async function fetchWithRetry(url, options, retries = 3) {
     try {
       return await fetch(url, options);
     } catch (err) {
+      if (err.name === "AbortError") throw err; // user cancelled — don't retry
       if (attempt >= retries) {
         throw new Error(
           "Can't reach the server — it may just be waking up. Please try again in a few seconds."
@@ -56,7 +57,7 @@ async function refresh() {
   return tokens.accessToken;
 }
 
-export async function api(path, { method = "GET", body, auth = false, _retried = false } = {}) {
+export async function api(path, { method = "GET", body, auth = false, signal, _retried = false } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (auth) {
     const { accessToken } = getTokens();
@@ -66,12 +67,13 @@ export async function api(path, { method = "GET", body, auth = false, _retried =
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal,
   });
 
   if (res.status === 401 && auth && !_retried) {
     try {
       await refresh();
-      return api(path, { method, body, auth, _retried: true });
+      return api(path, { method, body, auth, signal, _retried: true });
     } catch {
       clearTokens();
       throw new Error("Session expired. Please log in again.");

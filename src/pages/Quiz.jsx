@@ -9,9 +9,28 @@ export default function Quiz() {
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [best, setBest] = useState({}); // category -> { score, total, attempts }
+
+  function loadHistory() {
+    api("/quiz/results/history", { auth: true })
+      .then((list) => {
+        const map = {};
+        for (const r of list) {
+          const cur = map[r.category];
+          if (!cur || r.score / r.total > cur.score / cur.total) {
+            map[r.category] = { score: r.score, total: r.total, attempts: (cur?.attempts || 0) + 1 };
+          } else {
+            cur.attempts += 1;
+          }
+        }
+        setBest(map);
+      })
+      .catch(() => {});
+  }
 
   useEffect(() => {
     api("/quiz/categories").then(setCategories).catch(() => {});
+    loadHistory();
   }, []);
 
   async function start(cat) {
@@ -32,6 +51,7 @@ export default function Quiz() {
     setBusy(true);
     try {
       setResult(await api(`/quiz/${active}/submit`, { method: "POST", auth: true, body: { answers } }));
+      loadHistory(); // refresh best-score badges
     } catch (err) {
       alert(err.message);
     } finally {
@@ -43,14 +63,29 @@ export default function Quiz() {
     return (
       <div className="page">
         <h1>Quizzes</h1>
-        <p className="page-sub">Pick a category and test yourself.</p>
+        <p className="page-sub">
+          Pick a category and test yourself — retake any quiz as often as you like,
+          your best score is saved.
+        </p>
         <div className="quiz-cat-grid">
-          {categories.map((c) => (
-            <button key={c.id} className="quiz-cat-card" onClick={() => start(c.id)}>
-              <h3>{c.id}</h3>
-              <span>{c.count} questions</span>
-            </button>
-          ))}
+          {categories.map((c) => {
+            const b = best[c.id];
+            const pct = b ? Math.round((b.score / b.total) * 100) : null;
+            return (
+              <button key={c.id} className={`quiz-cat-card ${b ? "attempted" : ""}`} onClick={() => start(c.id)}>
+                <h3>{c.id}</h3>
+                <span>{c.count} questions</span>
+                {b ? (
+                  <span className={`quiz-best ${pct === 100 ? "perfect" : pct >= 70 ? "good" : ""}`}>
+                    {pct === 100 ? "🏆" : "✅"} Best: {b.score}/{b.total}
+                    <em> · 🔄 Retry</em>
+                  </span>
+                ) : (
+                  <span className="quiz-new">▶ Start</span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     );

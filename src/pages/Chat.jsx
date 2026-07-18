@@ -22,7 +22,20 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [copiedIdx, setCopiedIdx] = useState(null);
   const endRef = useRef(null);
+  const abortRef = useRef(null);
+
+  function stopGenerating() {
+    abortRef.current?.abort();
+  }
+
+  function copyMessage(text, i) {
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopiedIdx(i);
+      setTimeout(() => setCopiedIdx(null), 1400);
+    });
+  }
 
   async function loadConversations(openLatest = false) {
     try {
@@ -73,10 +86,12 @@ export default function Chat() {
     setMessages(next);
     setInput("");
     setBusy(true);
+    abortRef.current = new AbortController();
     try {
       const { reply, conversationId } = await api("/chat", {
         method: "POST",
         auth: true,
+        signal: abortRef.current.signal,
         body: {
           messages: next.filter((m) => m !== GREETING),
           conversationId: activeId,
@@ -95,9 +110,14 @@ export default function Chat() {
         });
       }
     } catch (err) {
-      setMessages((m) => [...m, { role: "assistant", content: `⚠️ ${err.message}` }]);
+      if (err.name === "AbortError") {
+        setMessages((m) => [...m, { role: "assistant", content: "⏹ *Stopped — ask me anything else.*" }]);
+      } else {
+        setMessages((m) => [...m, { role: "assistant", content: `⚠️ ${err.message}` }]);
+      }
     } finally {
       setBusy(false);
+      abortRef.current = null;
     }
   }
 
@@ -143,8 +163,16 @@ export default function Chat() {
       <div className="chat-main">
         <div className="chat-topbar">
           <button className="chat-burger" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
-          <span className="chat-topbar-title">
-            {conversations.find((c) => c._id === activeId)?.title || "New chat"}
+          <span className="chat-topbar-bot">
+            <span className="chat-topbar-avatar">🤖</span>
+            <span className="chat-topbar-meta">
+              <span className="chat-topbar-title">
+                {conversations.find((c) => c._id === activeId)?.title || "DevPrep AI Coach"}
+              </span>
+              <span className={`chat-topbar-status ${busy ? "typing" : ""}`}>
+                {busy ? "typing…" : "● online · asks nothing, judges nothing"}
+              </span>
+            </span>
           </span>
         </div>
 
@@ -154,13 +182,24 @@ export default function Chat() {
               {m.role === "assistant" && <span className="chat-avatar">🤖</span>}
               <div className="chat-bubble">
                 {m.role === "assistant" ? <Markdown text={m.content} /> : m.content}
+                {m.role === "assistant" && m !== GREETING && (
+                  <button
+                    className="chat-copy"
+                    title="Copy answer"
+                    onClick={() => copyMessage(m.content, i)}
+                  >
+                    {copiedIdx === i ? "✓ copied" : "📋"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
           {busy && (
             <div className="chat-msg assistant">
               <span className="chat-avatar">🤖</span>
-              <div className="chat-bubble typing">Thinking…</div>
+              <div className="chat-bubble typing-dots">
+                <span /><span /><span />
+              </div>
             </div>
           )}
           <div ref={endRef} />
@@ -178,9 +217,17 @@ export default function Chat() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a JavaScript doubt…"
+            placeholder="Ask any JavaScript, React or interview doubt…"
           />
-          <button className="btn btn-primary" disabled={busy || !input.trim()}>Send</button>
+          {busy ? (
+            <button type="button" className="btn btn-outline chat-stop" onClick={stopGenerating}>
+              ⏹ Stop
+            </button>
+          ) : (
+            <button className="btn btn-primary chat-send" disabled={!input.trim()}>
+              ➤
+            </button>
+          )}
         </form>
       </div>
     </div>
