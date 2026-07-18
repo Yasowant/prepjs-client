@@ -453,37 +453,58 @@ fetch("https://prepjs-server.onrender.com/api/v1/products?limit=5")
       </section>
 
       {/* DEVELOPER */}
-      <section className="section" id="developer">
+      <section className="section dev-section" id="developer">
+        <div className="dev-bg-icons" aria-hidden="true">
+          {["⚛️", "JS", "🟢", "🍃", "🐳", "TS", "{ }", "</>", "⚡", "🚀", "npm", "☁️"].map((s, i) => (
+            <span key={i} style={{ "--i": i }}>{s}</span>
+          ))}
+        </div>
         <Reveal>
           <h2>Building <span className="gradient-text shimmer">Engineers</span>, Not Just Coders</h2>
           <p className="dev-section-sub">— from the developer behind DevPrep</p>
         </Reveal>
         <Reveal delay={80}>
           <div className="dev-card">
-            <div className="dev-photo-wrap">
-              <img src="/yasowant.jpg" alt="Yasowant Nayak" className="dev-photo" />
-              <div className="dev-photo-glow" />
+            <div className="dev-photo-side">
+              <div className="dev-photo-wrap">
+                <div className="dev-ring" />
+                <img src="/yasowant.jpg" alt="Yasowant Nayak" className="dev-photo" />
+                <div className="dev-photo-glow" />
+                <span className="dev-photo-badge">👨‍💻</span>
+              </div>
+              <span className="dev-open-badge"><span className="pulse-dot" /> Building in public</span>
             </div>
             <div className="dev-info">
               <h3>Yasowant Nayak</h3>
-              <p className="dev-role">Full Stack Software Engineer · Bangalore, India</p>
+              <div className="dev-role-rotator">
+                <span>Full Stack Software Engineer 🚀</span>
+                <span>React.js & Node.js Specialist ⚛️</span>
+                <span>Creator of DevPrep 🎓</span>
+              </div>
+              <p className="dev-loc">📍 Bangalore, India</p>
+
+              <div className="dev-stats">
+                <div><strong>3+</strong><span>years exp</span></div>
+                <div><strong>8+</strong><span>enterprise orgs</span></div>
+                <div><strong>50%</strong><span>faster releases</span></div>
+                <div><strong>108</strong><span>concepts here</span></div>
+              </div>
+
               <p className="dev-desc">
-                Full Stack Engineer with <strong>3+ years</strong> building production SaaS on
-                React.js and Node.js — scaling a multi-tenant platform to <strong>8+ enterprise
-                organizations</strong>, cutting release time 50% with CI/CD, and mentoring
-                developers along the way. I built DevPrep from the exact concepts and questions
-                asked in real interviews, so you can walk in prepared for what actually comes up.
+                I build production SaaS on React.js and Node.js — and I built DevPrep from
+                the <strong>exact concepts and questions asked in real interviews</strong>,
+                so you can walk in prepared for what actually comes up.
               </p>
               <div className="dev-tech">
-                {["React.js", "Next.js", "TypeScript", "Node.js", "Express", "MongoDB", "PostgreSQL", "Redis", "Docker", "CI/CD"].map((t) => (
-                  <span className="chip small" key={t}>{t}</span>
+                {["React.js", "Next.js", "TypeScript", "Node.js", "Express", "MongoDB", "PostgreSQL", "Redis", "Docker", "CI/CD"].map((t, i) => (
+                  <span className="chip small dev-chip" style={{ "--d": `${i * 70}ms` }} key={t}>{t}</span>
                 ))}
               </div>
               <div className="dev-links">
-                <a href="https://yasowantdev.info" target="_blank" rel="noreferrer" className="btn btn-outline">🌐 Portfolio</a>
-                <a href="https://www.linkedin.com/in/yasowant-nayak-154968269/" target="_blank" rel="noreferrer" className="btn btn-outline">💼 LinkedIn</a>
-                <a href="https://github.com/Yasowant" target="_blank" rel="noreferrer" className="btn btn-outline">🐙 GitHub</a>
-                <a href="mailto:yasowant1998@gmail.com" className="btn btn-outline">✉️ Email</a>
+                <a href="https://yasowantdev.info" target="_blank" rel="noreferrer" className="btn btn-outline dev-link">🌐 Portfolio</a>
+                <a href="https://www.linkedin.com/in/yasowant-nayak-154968269/" target="_blank" rel="noreferrer" className="btn btn-outline dev-link">💼 LinkedIn</a>
+                <a href="https://github.com/Yasowant" target="_blank" rel="noreferrer" className="btn btn-outline dev-link">🐙 GitHub</a>
+                <a href="mailto:yasowant1998@gmail.com" className="btn btn-outline dev-link">✉️ Email</a>
               </div>
             </div>
           </div>

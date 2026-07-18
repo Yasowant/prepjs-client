@@ -2476,6 +2476,89 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 }
 @media (max-width: 720px) { .iv-topic-grid { grid-template-columns: 1fr; } }
 
+/* ---------- DEVELOPER CARD v2 (animated) ---------- */
+.dev-section { position: relative; overflow: hidden; }
+.dev-section .reveal, .dev-section .dev-card { position: relative; z-index: 1; }
+.dev-bg-icons { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.dev-bg-icons span {
+  position: absolute; bottom: -50px;
+  left: calc(3% + var(--i) * 8.2%);
+  font-size: 1.5rem; font-family: var(--mono); font-weight: 700;
+  color: var(--accent); opacity: 0;
+  animation: skillrise linear infinite;
+  animation-duration: calc(12s + var(--i) * 1.6s);
+  animation-delay: calc(var(--i) * -2.4s);
+}
+.dev-bg-icons span:nth-child(even) { color: var(--primary); font-size: 1.2rem; }
+.dev-bg-icons span:nth-child(3n) { color: var(--green); }
+@keyframes skillrise {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.15; }
+  80% { opacity: 0.12; }
+  100% { transform: translateY(-620px) rotate(16deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .dev-bg-icons { display: none; } }
+.dev-photo-side { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.dev-photo-wrap { animation: devfloat 5s ease-in-out infinite; }
+@keyframes devfloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.dev-ring {
+  position: absolute; inset: -7px; border-radius: 50%; z-index: 0;
+  background: conic-gradient(from 0deg, #38bdf8, #facc15, #34d399, #c084fc, #38bdf8);
+  animation: ringspin 5s linear infinite;
+}
+@keyframes ringspin { to { transform: rotate(360deg); } }
+.dev-photo { position: relative; z-index: 1; border: 4px solid var(--bg); }
+.dev-photo-badge {
+  position: absolute; bottom: 4px; right: 4px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%; font-size: 1.15rem;
+  background: var(--card); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  animation: devwave 3s ease-in-out infinite;
+}
+@keyframes devwave { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-14deg); } 92% { transform: rotate(12deg); } }
+.dev-open-badge {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.76rem; font-weight: 700; color: var(--green);
+  background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 100px; padding: 5px 14px;
+}
+.dev-role-rotator {
+  position: relative; height: 1.6em; overflow: hidden; margin-bottom: 2px;
+}
+.dev-role-rotator span {
+  position: absolute; left: 0; top: 0; opacity: 0;
+  color: var(--accent); font-weight: 700; font-size: 0.95rem;
+  animation: roleswap 9s infinite;
+}
+.dev-role-rotator span:nth-child(2) { animation-delay: 3s; }
+.dev-role-rotator span:nth-child(3) { animation-delay: 6s; }
+@keyframes roleswap {
+  0% { opacity: 0; transform: translateY(110%); }
+  4%, 30% { opacity: 1; transform: translateY(0); }
+  36%, 100% { opacity: 0; transform: translateY(-110%); }
+}
+.dev-loc { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px; }
+.dev-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px; margin-bottom: 16px;
+}
+.dev-stats > div {
+  background: rgba(56, 189, 248, 0.05); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 12px; text-align: center;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.dev-stats > div:hover { transform: translateY(-3px); border-color: var(--accent); }
+.dev-stats strong { display: block; font-size: 1.25rem; color: var(--primary); }
+.dev-stats span { color: var(--text-dim); font-size: 0.72rem; }
+.dev-chip {
+  animation: chipin 0.5s ease both; animation-delay: var(--d, 0ms);
+  transition: transform 0.15s, border-color 0.15s, color 0.15s;
+}
+.dev-chip:hover { transform: translateY(-3px) scale(1.05); border-color: var(--accent); color: var(--accent); }
+@keyframes chipin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.dev-link { transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.dev-link:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(56, 189, 248, 0.15); }
+
 /* ---------- QUIZ BEST BADGES ---------- */
 .quiz-cat-card.attempted { border-color: rgba(52, 211, 153, 0.35); }
 .quiz-best {
