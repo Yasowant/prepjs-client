@@ -89,12 +89,14 @@ function TypingCode() {
 const FLOATERS = ["=>", "async", "{ }", "??", "...spread", "await", "this", "===", "[ ]", "npm run dev", "useState()", "console.log"];
 
 const FEATURES = [
-  { icon: "📚", title: "108+ Concepts, Zero Gaps", desc: "JavaScript from variables to V8 internals, React from JSX to concurrent rendering — every concept explained with runnable code and the exact interview answer." },
-  { icon: "⚛️", title: "React Lab — Code It Live", desc: "15 machine-coding challenges (Todo, Debounce Search, Infinite Scroll…) with approach guides and solutions — write the component, watch the UI render live." },
-  { icon: "🎯", title: "315+ Interview Q&A Bank", desc: "Every question interviewers actually ask, with model answers — filter by JavaScript or React, search, and rehearse out loud." },
-  { icon: "⌨️", title: "Coding Playground + Judge", desc: "LeetCode-style problems with auto-tests and saved submissions, plus real-world projects: LRU cache, rate limiter, event emitter." },
+  { icon: "📚", title: "108+ Concepts, Zero Gaps", desc: "JavaScript from variables to V8 internals, React from JSX to concurrent rendering — every concept explained with runnable code, the exact interview answer, and your own saved notes." },
+  { icon: "⚛️", title: "React Lab — Real CodeSandbox Engine", desc: "25 machine-coding challenges (Todo, OTP Input, Autocomplete, Drag & Drop…) in a live editor with hot reload, real npm packages, code folding — and an AI reviewer that scores your solution /10." },
+  { icon: "🎤", title: "AI Mock Interview — Voice + Video", desc: "The AI asks 7 questions out loud, you answer on camera, and get a scored report with feedback, model answers and a hire signal. Your recording is saved so you can rewatch yourself." },
+  { icon: "⌨️", title: "Coding Playground + Judge", desc: "LeetCode-style problems with auto-tests and saved submissions, plus real-world projects: LRU cache, rate limiter, event emitter — all in a VS Code editor." },
+  { icon: "🃏", title: "Flashcards & Tricky Quizzes", desc: "Rapid-revision flashcard decks of all 315+ Q&A ('Knew it' vs 'Revise again'), plus 109 quiz questions including the traps that fail candidates: [] == ![], map(parseInt), the var loop…" },
   { icon: "🤖", title: "AI Doubt Coach", desc: "Stuck on closures or useEffect at 2 AM? Ask anything — answers like a friendly senior dev, with code, saved like ChatGPT." },
-  { icon: "📈", title: "Progress That Follows You", desc: "Quizzes with tricky traps, per-category progress bars, and all your code saved to your account — pick up on any device." },
+  { icon: "🔥", title: "Streaks, XP & Certificates", desc: "Daily streaks, XP for everything you solve, 11 badges, a community leaderboard — and a shareable certificate when you complete a track. Post it on LinkedIn." },
+  { icon: "🔌", title: "Free Public REST API", desc: "A dummyjson-style practice API (users, products, todos, posts, quotes) — no key, no login, CORS open. Build your fetch/axios projects against it from anywhere." },
 ];
 
 const PREVIEWS = [
@@ -117,6 +119,7 @@ const ROADMAP = [
   ["Advanced JS + Coding", "Debounce · Patterns · Polyfills · Tricky Outputs"],
   ["React Basics & Hooks", "JSX · Props · State · useEffect · Custom Hooks"],
   ["React Advanced", "Virtual DOM · Performance · Redux · React 18"],
+  ["Prove It", "AI Mock Interview · Flashcards · Certificate 🎓"],
 ];
 
 const TESTIMONIALS = [
@@ -126,12 +129,13 @@ const TESTIMONIALS = [
 ];
 
 const FAQS = [
-  ["Is DevPrep really free?", "Yes — every concept, quiz, the playground and the AI coach are free. Just sign up and verify your email."],
+  ["Is DevPrep really free?", "Yes — every concept, the mock interviews, React Lab, playground, flashcards, quizzes, AI coach and the public API are free. Just sign up and verify your email."],
+  ["How does the AI mock interview work?", "Pick a track (JavaScript, React or Full Stack) and level, and the AI interviewer asks 7 questions out loud — starting with 'introduce yourself'. You answer by speaking with your camera on (or typing). At the end you get a score per answer, honest feedback, model answers and a hire signal — and your video is saved so you can rewatch your own performance."],
+  ["Does it cover machine coding rounds?", "Deeply — the React Lab runs the real CodeSandbox engine with 25 live challenges: Todo, Debounce Search, OTP Input, Autocomplete, Drag & Drop, Infinite Scroll, File Explorer Tree and more. Hot reload as you type, real npm packages, approach checklists, full solutions — and an AI reviewer that scores your submission against the requirements."],
   ["Does it cover React or only JavaScript?", "Both, fully. The React track has 27 concepts and 100+ interview Q&A: JSX, hooks deep-dives, Virtual DOM, performance, Redux, React 18 concurrent features, and the most-asked practical scenario questions."],
-  ["I'm a complete beginner. Will I understand it?", "Absolutely. Concepts are organized basic → intermediate → advanced. Start with JS Fundamentals, and several concepts (including JSX and useState) are open without even logging in."],
-  ["How is this different from YouTube tutorials?", "Every concept is structured for interviews: explanation + runnable code + the actual Q&A interviewers ask. Plus a 315-question Q&A bank, quizzes to prove you retained it, and progress tracking to keep you honest."],
-  ["Does it cover machine coding rounds?", "Yes, deeply — the React Lab has 15 live challenges (Counter, Todo, Debounce Search, Infinite Scroll, Employee Management…) with approach guides and full solutions, and the JS Playground has polyfills, LRU cache, rate limiters and more with auto-judged tests."],
-  ["Can I practice code inside DevPrep?", "Yes — write code in a real editor and run it instantly. React components render live in a preview with axios, react-router-dom and lodash preinstalled, and your code saves to your account so it's there on any device."],
+  ["I'm a complete beginner. Will I understand it?", "Absolutely. Concepts are organized basic → intermediate → advanced, and every concept's explanation is free to read without logging in. Start with JS Fundamentals and work up the roadmap."],
+  ["How do I stay consistent?", "DevPrep is built for daily practice: streaks that grow every day you show up, XP and levels for everything you solve, 11 badges, a community leaderboard — and when you complete a full track, a certificate with your name you can add to LinkedIn."],
+  ["What's the free public API?", "A dummyjson-style REST API (users, products, todos, posts, quotes) with zero setup — no key, no login, CORS open to every origin. Perfect for practicing fetch, axios, pagination and infinite scroll in your own projects."],
 ];
 
 /* ---------- page ---------- */
@@ -168,16 +172,16 @@ export default function Landing() {
         ))}
 
         <div className="hero-badge">
-          <span className="pulse-dot" /> {stats.concepts}+ concepts · quizzes · playground · AI coach
+          <span className="pulse-dot" /> {stats.concepts}+ concepts · AI mock interviews · live React editor · free API
         </div>
         <h1>
           Crack Your <span className="gradient-text shimmer">JavaScript & React</span>
           <br /> Interviews — In One Place
         </h1>
         <p className="hero-sub">
-          Learn every concept with runnable code. Rehearse 315+ real interview questions
-          with answers. Solve machine-coding challenges in a live editor — and watch your
-          React UI render as you type. Free, forever.
+          Learn every concept with runnable code. Rehearse 315+ real questions with
+          flashcards. Build components in a live CodeSandbox-powered editor. Then face an
+          AI interviewer on camera and get scored like the real thing. Free, forever.
         </p>
         <p className="hero-tagline">From <code>console.log</code> to offer letter. 🚀</p>
         <div className="hero-cta">
@@ -233,8 +237,8 @@ export default function Landing() {
       <section className="stats-strip">
         <div><CountUp to={stats.concepts} suffix="+" /><span>Concepts</span></div>
         <div><CountUp to={315} suffix="+" /><span>Interview Q&A</span></div>
-        <div><CountUp to={36} /><span>Coding Challenges</span></div>
-        <div><CountUp to={99} /><span>Quiz Questions</span></div>
+        <div><CountUp to={46} /><span>Coding Challenges</span></div>
+        <div><CountUp to={109} /><span>Quiz Questions</span></div>
         <div><CountUp to={100} suffix="%" /><span>Free Forever</span></div>
       </section>
 
@@ -251,10 +255,12 @@ export default function Landing() {
             </p>
             <p>
               The flow is simple — <strong>Learn</strong> a concept with runnable code,{" "}
-              <strong>Rehearse</strong> its interview questions from the Q&A bank,{" "}
-              <strong>Practice</strong> it in the coding playground or React Lab, and{" "}
-              <strong>Prove</strong> it with quizzes and auto-judged submissions. Your progress
-              and code are saved to your account, so you can prepare from anywhere.
+              <strong>Rehearse</strong> it with flashcards and the Q&A bank,{" "}
+              <strong>Practice</strong> it in the coding playground or the CodeSandbox-powered
+              React Lab, and <strong>Prove</strong> it in an AI mock interview — on camera,
+              scored like the real thing. Finish a track and earn a{" "}
+              <strong>shareable certificate</strong> for your LinkedIn. Your progress, code,
+              notes and interview recordings are all saved to your free account.
             </p>
           </div>
         </Reveal>
@@ -338,6 +344,40 @@ console.log(counter()); // ▶ 2
 TERMINAL
 ✓ 1
 ✓ 2`}</pre>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* FREE API PROMO */}
+      <section className="section pg-promo api-promo">
+        <Reveal delay={120}>
+          <div className="code-window pg-promo-window">
+            <div className="code-titlebar">
+              <span className="dot red" /><span className="dot yellow" /><span className="dot green" />
+              <span className="code-filename">your-project.js — works from anywhere</span>
+            </div>
+            <pre>{`// no key · no login · CORS open
+fetch("https://prepjs-server.onrender.com/api/v1/products?limit=5")
+  .then((res) => res.json())
+  .then((data) => console.log(data.products));
+
+// 👥 users  🛍 products  ✅ todos
+// 📝 posts  💬 quotes — all free
+// + search & pagination built in`}</pre>
+          </div>
+        </Reveal>
+        <Reveal>
+          <div className="pg-promo-text">
+            <h2 style={{ textAlign: "left" }}>
+              A <span className="gradient-text">free REST API</span> for your practice projects
+            </h2>
+            <p>
+              Building a todo app, product list or infinite scroll? Don't mock data by hand —
+              DevPrep ships a dummyjson-style API with <strong>210+ records</strong> across users,
+              products, todos, posts and quotes. Pagination, search and simulated writes included.
+              No key, no login, works from localhost, CodePen, Postman — anywhere.
+            </p>
+            <Link to="/api" className="btn btn-primary btn-lg btn-glow">🔌 Explore the Free API</Link>
           </div>
         </Reveal>
       </section>
@@ -461,8 +501,9 @@ TERMINAL
                 <h2>Your next interview is coming.<br /><span className="gradient-text shimmer">Be ready for it.</span></h2>
               </div>
               <p className="cta-sub">
-                Unlock all {stats.concepts}+ JavaScript & React concepts, the 315+ Q&A bank,
-                the coding playground, quizzes and your personal AI coach — everything in one place.
+                Unlock all {stats.concepts}+ concepts, 315+ Q&A with flashcards, 46 coding
+                challenges, AI mock interviews on camera, streaks & certificates — everything
+                in one place.
               </p>
               <div className="cta-checks">
                 <span>✓ Free forever</span>
@@ -490,10 +531,15 @@ TERMINAL
             <span className="footer-brand"><Logo size={30} /> Dev<span className="brand-accent">Prep</span></span>
             <p className="footer-tagline">From <code>console.log</code> to offer letter. 🚀</p>
             <p className="footer-mini">
-              The complete JavaScript & React interview prep platform — every concept,
-              a 315+ Q&A bank, a VS Code playground, quizzes, and a 24/7 AI coach.
+              Free JavaScript & React interview prep — learn, practice, get interviewed
+              by AI, earn your certificate.
             </p>
-            <span className="footer-stack">React · Node.js · Express · MongoDB</span>
+            <div className="footer-social">
+              <a href="https://www.linkedin.com/in/yasowant-nayak-154968269/" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a href="https://github.com/Yasowant" target="_blank" rel="noreferrer">GitHub</a>
+              <a href="https://yasowantdev.info" target="_blank" rel="noreferrer">Portfolio</a>
+              <a href="mailto:yasowant1998@gmail.com">Email</a>
+            </div>
           </div>
 
           <div className="footer-col">
@@ -501,28 +547,26 @@ TERMINAL
             <Link to="/concepts?track=js">JavaScript Concepts</Link>
             <Link to="/concepts?track=react">React Concepts</Link>
             <Link to="/questions">Q&A Bank</Link>
+            <Link to="/flashcards">Flashcards</Link>
+            <Link to="/quiz">Quizzes</Link>
+          </div>
+
+          <div className="footer-col">
+            <h4>Practice</h4>
             <Link to="/playground">Playground</Link>
             <Link to="/react-lab">React Lab</Link>
             <Link to="/visualizer">Event Loop Visualizer</Link>
-            <Link to="/api">Public API</Link>
-            <Link to="/quiz">Quizzes</Link>
-            <Link to="/chat">AI Coach</Link>
+            <Link to="/interview">AI Mock Interview</Link>
+            <Link to="/api">Free API</Link>
           </div>
 
           <div className="footer-col">
-            <h4>Account</h4>
-            <Link to="/register">Create account</Link>
-            <Link to="/login">Login</Link>
+            <h4>Achieve</h4>
+            <Link to="/dashboard">Certificates 🎓</Link>
+            <Link to="/leaderboard">Leaderboard</Link>
             <Link to="/dashboard">Dashboard</Link>
+            <Link to="/register">Create free account</Link>
             <a href="#developer">About the developer</a>
-          </div>
-
-          <div className="footer-col">
-            <h4>Connect</h4>
-            <a href="https://www.linkedin.com/in/yasowant-nayak-154968269/" target="_blank" rel="noreferrer">LinkedIn ↗</a>
-            <a href="https://github.com/Yasowant" target="_blank" rel="noreferrer">GitHub ↗</a>
-            <a href="https://yasowantdev.info" target="_blank" rel="noreferrer">Portfolio ↗</a>
-            <a href="mailto:yasowant1998@gmail.com">Email</a>
           </div>
         </div>
 
