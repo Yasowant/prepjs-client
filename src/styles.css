@@ -2705,6 +2705,37 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 .cert-locked p { color: var(--text-dim); line-height: 1.65; }
 .cert-locked strong { color: var(--text); }
 .cert-locked .btn { align-self: flex-start; }
+.cert-overall {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 22px 26px; margin: 16px 0 8px;
+}
+.cert-overall-body { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+.cert-overall-body strong { font-size: 1.08rem; }
+.cert-overall-body > span { color: var(--text-dim); font-size: 0.88rem; }
+.cert-cats { display: flex; flex-direction: column; gap: 8px; }
+.cert-cat-row {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px; color: var(--text);
+  transition: border-color 0.13s;
+}
+.cert-cat-row:hover { border-color: var(--accent); }
+.cert-cat-icon { font-size: 1.3rem; }
+.cert-cat-mid { flex: 1; min-width: 0; }
+.cert-cat-top {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 0.88rem; font-weight: 600; margin-bottom: 6px;
+}
+.cert-cat-top span:last-child { color: var(--text-dim); font-weight: 500; }
+.cert-cat-done { color: var(--green) !important; font-weight: 700 !important; }
+.cert-remaining { display: flex; flex-wrap: wrap; gap: 8px; }
+.cert-remaining-chip {
+  background: var(--card); border: 1px dashed var(--border); border-radius: 100px;
+  padding: 6px 15px; color: var(--text-dim); font-size: 0.83rem; font-weight: 600;
+  transition: color 0.13s, border-color 0.13s;
+}
+.cert-remaining-chip:hover { color: var(--accent); border-color: var(--accent); border-style: solid; }
 .cert-hint { color: var(--text-dim); font-size: 0.83rem; margin-top: 12px; }
 
 /* ---------- CONCEPT NOTES ---------- */

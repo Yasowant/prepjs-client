@@ -156,18 +156,66 @@ export default function Certificate() {
     return (
       <div className="page cert-page">
         <h1>🎓 {t.name} Certificate</h1>
-        <div className="cert-locked">
-          <p>
-            Complete <strong>all {t.total} concepts</strong> in this track to earn your
-            certificate — you're at <strong>{t.completed}/{t.total} ({t.percent}%)</strong>.
-          </p>
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${t.percent}%` }} />
+        <p className="page-sub">
+          Complete all {t.total} concepts in this track to earn your certificate.
+          Mark each concept ✓ Completed as you finish reading it.
+        </p>
+
+        {/* overall */}
+        <div className="cert-overall">
+          <div className="iv-score-ring" style={{ "--pct": t.percent }}>
+            <span>{t.percent}<small>%</small></span>
           </div>
-          <p className="cert-hint">
-            Mark concepts as ✓ Completed as you finish reading them — {t.total - t.completed} to go!
-          </p>
+          <div className="cert-overall-body">
+            <strong>{t.completed} of {t.total} concepts completed</strong>
+            <span>{t.total - t.completed} to go — you're closer than you think 💪</span>
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${t.percent}%` }} />
+            </div>
+          </div>
+        </div>
+
+        {/* per-category breakdown */}
+        <h2 className="iv-h2">📊 Progress by category</h2>
+        <div className="cert-cats">
+          {t.byCategory.map((c) => {
+            const pct = c.total ? Math.round((c.completed / c.total) * 100) : 0;
+            return (
+              <Link to={`/concepts?category=${c.id}`} className="cert-cat-row" key={c.id}>
+                <span className="cert-cat-icon">{c.icon}</span>
+                <div className="cert-cat-mid">
+                  <div className="cert-cat-top">
+                    <span>{c.name}</span>
+                    <span className={pct === 100 ? "cert-cat-done" : ""}>
+                      {pct === 100 ? "✅" : ""} {c.completed}/{c.total}
+                    </span>
+                  </div>
+                  <div className="progress-bar">
+                    <div className={`progress-fill ${pct === 100 ? "full" : ""}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* exactly what's left */}
+        {t.remaining.length > 0 && (
+          <>
+            <h2 className="iv-h2">📝 Remaining concepts ({t.remaining.length}) — click to read</h2>
+            <div className="cert-remaining">
+              {t.remaining.map((c) => (
+                <Link to={`/concepts/${c.id}`} className="cert-remaining-chip" key={c.id}>
+                  {c.title}
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div className="iv-actions" style={{ marginTop: 24 }}>
           <Link to="/concepts" className="btn btn-primary">Continue learning →</Link>
+          <Link to="/dashboard" className="btn btn-outline">← Dashboard</Link>
         </div>
       </div>
     );
