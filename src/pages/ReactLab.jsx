@@ -7,6 +7,7 @@ import {
   SandpackConsole,
   useActiveCode,
 } from "@codesandbox/sandpack-react";
+import { codeFolding, foldGutter, foldKeymap } from "@codemirror/language";
 import { Link } from "react-router-dom";
 import { REACT_CHALLENGES } from "../data/reactLab.js";
 import { api } from "../api.js";
@@ -888,6 +889,8 @@ export default function ReactLab() {
                 showInlineErrors
                 showTabs={false}
                 wrapContent
+                extensions={[codeFolding(), foldGutter()]}
+                extensionsKeymap={foldKeymap}
               />
               <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton />
             </SandpackLayout>

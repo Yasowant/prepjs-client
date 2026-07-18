@@ -2559,11 +2559,22 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 }
 :root[data-theme="light"] .sidebar { background: #fff; }
 
+.sb-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 12px;
+}
 .sb-brand {
   display: flex; align-items: center; gap: 9px;
   font-size: 1.2rem; font-weight: 700; color: var(--text);
-  padding: 2px 10px 14px; white-space: nowrap;
+  padding: 2px 10px; white-space: nowrap;
 }
+.sb-collapse-btn {
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text-dim); font-size: 0.95rem; padding: 3px 9px;
+  cursor: pointer; flex-shrink: 0; line-height: 1.4;
+  transition: border-color 0.13s, color 0.13s;
+}
+.sb-collapse-btn:hover { border-color: var(--accent); color: var(--accent); }
 .sb-nav { display: flex; flex-direction: column; }
 .sb-section {
   font-size: 0.62rem; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase;
@@ -2601,7 +2612,15 @@ a.api-path:hover { color: var(--accent); text-decoration: underline; }
 .app-shell.sb-collapsed .sb-section,
 .app-shell.sb-collapsed .sb-kbd { display: none; }
 .app-shell.sb-collapsed .sb-link { justify-content: center; padding: 10px 0; gap: 0; }
+.app-shell.sb-collapsed .sb-top { flex-direction: column; gap: 10px; align-items: center; }
 .app-shell.sb-collapsed .sb-brand { justify-content: center; padding-left: 0; padding-right: 0; }
+/* fold gutter arrows in the React Lab editor */
+.rlab-sandpack .cm-foldGutter span { color: var(--text-dim); cursor: pointer; }
+.rlab-sandpack .cm-foldGutter span:hover { color: var(--accent); }
+.rlab-sandpack .cm-foldPlaceholder {
+  background: rgba(56, 189, 248, 0.12); border: none; color: var(--accent);
+  border-radius: 4px; padding: 0 6px; cursor: pointer;
+}
 .app-shell.sb-collapsed .sb-mini { justify-content: center; padding: 8px 4px; }
 .app-shell.sb-collapsed .sb-nav > div { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 8px; }
 .app-shell.sb-collapsed .sb-nav > div:first-child { border-top: none; margin-top: 0; padding-top: 0; }

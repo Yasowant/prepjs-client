@@ -57,10 +57,19 @@ export default function Sidebar({ collapsed, onToggle }) {
     <>
       {open && <div className="sb-backdrop" onClick={close} />}
       <aside className={`sidebar ${open ? "open" : ""}`}>
-        <Link to="/" className="sb-brand" onClick={close} title="DevPrep">
-          <Logo size={28} />
-          <span className="sb-label">Dev<span className="brand-accent">Prep</span></span>
-        </Link>
+        <div className="sb-top">
+          <Link to="/" className="sb-brand" onClick={close} title="DevPrep">
+            <Logo size={28} />
+            <span className="sb-label">Dev<span className="brand-accent">Prep</span></span>
+          </Link>
+          <button
+            className="sb-collapse-btn"
+            onClick={onToggle}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? "»" : "«"}
+          </button>
+        </div>
 
         <button
           className="sb-link sb-search"
@@ -106,10 +115,6 @@ export default function Sidebar({ collapsed, onToggle }) {
             )}
             <span className="sb-label">{user?.name?.split(" ")[0] || "Profile"}</span>
           </NavLink>
-          <button className="sb-link sb-collapse" onClick={onToggle} title={collapsed ? "Expand" : "Collapse"}>
-            <span className="sb-icon">{collapsed ? "»" : "«"}</span>
-            <span className="sb-label">Collapse</span>
-          </button>
         </div>
       </aside>
     </>
