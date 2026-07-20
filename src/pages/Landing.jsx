@@ -144,6 +144,11 @@ export default function Landing() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ concepts: 81, categories: 11 });
   const [community, setCommunity] = useState(null);
+  const [news, setNews] = useState([]);
+
+  useEffect(() => {
+    api("/news").then((d) => setNews((d.items || []).slice(0, 6))).catch(() => {});
+  }, []);
 
   useEffect(() => {
     api("/concepts/categories")
@@ -416,6 +421,41 @@ fetch("https://prepjs-server.onrender.com/api/v1/products?limit=5")
         </div>
       </section>
 
+      {/* TECH NEWS */}
+      {news.length > 0 && (
+        <section className="section">
+          <Reveal>
+            <h2>Stay current. <span className="gradient-text">Today's tech news.</span></h2>
+            <p className="dev-section-sub">
+              Fresh JavaScript & React news inside DevPrep — read full articles without leaving.
+            </p>
+          </Reveal>
+          <div className="lnews-grid">
+            {news.map((n, i) => (
+              <Reveal key={n.id} delay={i * 60}>
+                <Link to="/news" className="lnews-card">
+                  {n.image ? (
+                    <img src={n.image} alt="" className="lnews-img" loading="lazy" />
+                  ) : (
+                    <div className="lnews-img lnews-img-fallback">📰</div>
+                  )}
+                  <div className="lnews-body">
+                    <span className={`news-source ${n.source === "Hacker News" ? "hn" : "devto"}`}>
+                      {n.source}
+                    </span>
+                    <h3>{n.title}</h3>
+                    <span className="lnews-meta">▲ {n.points} · 💬 {n.comments}</span>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+          <div className="center-cta">
+            <Link to="/news" className="btn btn-outline">📰 Read all tech news →</Link>
+          </div>
+        </section>
+      )}
+
       {/* TESTIMONIALS */}
       <section className="section">
         <Reveal><h2>Devs who <span className="gradient-text">cracked it</span></h2></Reveal>
@@ -570,6 +610,7 @@ fetch("https://prepjs-server.onrender.com/api/v1/products?limit=5")
             <Link to="/questions">Q&A Bank</Link>
             <Link to="/flashcards">Flashcards</Link>
             <Link to="/quiz">Quizzes</Link>
+            <Link to="/news">Tech News</Link>
           </div>
 
           <div className="footer-col">

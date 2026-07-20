@@ -86,6 +86,11 @@ export const ROUTE_SEO = {
     description:
       "Take a realistic mock interview: the AI asks questions out loud, you answer on camera, and get scored feedback with model answers. Free.",
   },
+  "/news": {
+    title: "Tech News — Latest JavaScript, React & Web Dev Updates | DevPrep",
+    description:
+      "Fresh JavaScript, React and web development news, releases and top articles from Dev.to and Hacker News — updated every 30 minutes.",
+  },
   "/leaderboard": {
     title: "Leaderboard — Top JavaScript & React Learners | DevPrep",
     description:

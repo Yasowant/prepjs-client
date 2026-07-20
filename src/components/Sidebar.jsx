@@ -26,6 +26,7 @@ const SECTIONS = [
   {
     name: "More",
     items: [
+      ["📰", "Tech News", "/news"],
       ["🔌", "Free API", "/api"],
       ["🤖", "AI Coach", "/chat"],
       ["🏆", "Leaderboard", "/leaderboard"],

@@ -15,6 +15,7 @@ const PAGES = [
   { title: "Mock Interview", sub: "AI-graded timed interview", to: "/interview", icon: "🎤" },
   { title: "Flashcards", sub: "Rapid Q&A revision deck", to: "/flashcards", icon: "🃏" },
   { title: "Leaderboard", sub: "Top learners by XP", to: "/leaderboard", icon: "🏆" },
+  { title: "Tech News", sub: "Latest JS/React/web dev news", to: "/news", icon: "📰" },
   { title: "Quiz", sub: "109 questions, 12 categories", to: "/quiz", icon: "📝" },
   { title: "AI Coach", sub: "Ask any JavaScript doubt", to: "/chat", icon: "🤖" },
   { title: "Dashboard", sub: "Your progress, streak & badges", to: "/dashboard", icon: "📊" },

@@ -83,6 +83,7 @@ export default function Navbar() {
           {user && <NavLink to="/interview">🎤 Mock Interview</NavLink>}
         </Dropdown>
         <NavLink to="/api">Free API</NavLink>
+        <NavLink to="/news">News</NavLink>
         {user && <NavLink to="/chat">AI Coach</NavLink>}
         {user && <NavLink to="/dashboard">Dashboard</NavLink>}
       </div>
@@ -141,6 +142,7 @@ export default function Navbar() {
           {user && <NavLink to="/interview" onClick={close}>🎤 Mock Interview</NavLink>}
           <span className="nav-mobile-group">More</span>
           <NavLink to="/api" onClick={close}>🔌 Free API</NavLink>
+          <NavLink to="/news" onClick={close}>📰 Tech News</NavLink>
           {user && <NavLink to="/chat" onClick={close}>🤖 AI Coach</NavLink>}
           {user && <NavLink to="/dashboard" onClick={close}>📊 Dashboard</NavLink>}
           {user ? (
