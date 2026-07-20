@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import { ROUTE_SEO, setSEO } from "./utils/seo.js";
 import { useAuth } from "./context/AuthContext.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -72,6 +73,7 @@ export default function App() {
   return (
     <div className={user ? `app-shell ${sbCollapsed ? "sb-collapsed" : ""}` : undefined}>
       {user && <Sidebar collapsed={sbCollapsed} onToggle={toggleSidebar} />}
+      <Analytics />
       <Navbar />
       <SearchPalette />
       <Routes>
